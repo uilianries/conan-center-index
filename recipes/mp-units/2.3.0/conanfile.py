@@ -225,6 +225,7 @@ class MPUnitsConan(ConanFile):
         tc = CMakeToolchain(self)
         if opt.cxx_modules:
             tc.cache_variables["CMAKE_CXX_SCAN_FOR_MODULES"] = True
+            tc.cache_variables["MP_UNITS_BUILD_CXX_MODULES"] = True
         if opt.import_std:
             tc.cache_variables["CMAKE_CXX_MODULE_STD"] = True
             # TODO current experimental support according to `Help/dev/experimental.rst`
