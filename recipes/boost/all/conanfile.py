@@ -111,6 +111,7 @@ class BoostConan(ConanFile):
         "system_use_utf8": [True, False],
     }
     options.update({f"without_{_name}": [True, False] for _name in CONFIGURE_OPTIONS})
+    python_requires = "b2-generator-tool/0.1.0"
 
     default_options = {
         "shared": False,
@@ -859,6 +860,38 @@ class BoostConan(ConanFile):
             vc = VCVars(self)
             vc.generate()
 
+        b2gentool = self.python_requires["b2-generator-tool"].module.B2Generator(self)
+        b2gentool.set_feature("visibility", str(self.options.visibility))
+        b2gentool.set_feature("threading", "single" if not self.options.multithreading else "multi")
+        if not self.options.without_python:
+            # https://www.boost.org/doc/libs/1_70_0/libs/python/doc/html/building/configuring_boost_build.html
+            b2gentool.add_dependecy("python", self._python_version, self._python_executable, self._python_includes, self._python_library_dir)
+        if not self.options.without_mpi:
+            # https://www.boost.org/doc/libs/1_72_0/doc/html/mpi/getting_started.html
+            b2gentool.add_dependecy("mpi")
+
+        b2gentool.set_variable("NO_ZLIB", '0' if self._with_zlib else '1')
+        b2gentool.set_variable("NO_BZIP2", '0' if self._with_bzip2 else '1')
+        b2gentool.set_variable("NO_LZMA", '0' if self._with_lzma else '1')
+        b2gentool.set_variable("NO_ZSTD", '0' if self._with_zstd else '1')
+
+        if self.options.error_code_header_only:
+            b2gentool.set_feature("define", "BOOST_ERROR_CODE_HEADER_ONLY=1")
+        if self.options.system_no_deprecated:
+            b2gentool.set_feature("define", "BOOST_SYSTEM_NO_DEPRECATED=1")
+        if self.options.asio_no_deprecated:
+            b2gentool.set_feature("define", "BOOST_ASIO_NO_DEPRECATED=1")
+        if self.options.filesystem_no_deprecated:
+            b2gentool.set_feature("define", "BOOST_FILESYSTEM_NO_DEPRECATED=1")
+        if self.options.filesystem_use_std_fs:
+            b2gentool.set_feature("define", "BOOST_DLL_USE_STD_FS=1")
+        if self.options.system_use_utf8:
+            b2gentool.set_feature("define", "BOOST_SYSTEM_USE_UTF8=1")
+        if self.options.segmented_stacks:
+            b2gentool.set_feature("define", ["BOOST_USE_SEGMENTED_STACKS=1", "BOOST_USE_UCONTEXT=1"])
+            b2gentool.set_variable("segmented-stacks", "on")
+        b2gentool.generate()
+
     ##################### BUILDING METHODS ###########################
 
     def _run_python_script(self, script):
@@ -1066,7 +1099,7 @@ class BoostConan(ConanFile):
         with chdir(self, folder):
             njobs = build_jobs(self)
             njobs = f"-j{njobs}" if njobs else ""  # boost.build doesn't take -j0 as valid
-            command = f"{self._b2_exe} {njobs} --abbreviate-paths toolset={self._toolset}"
+            command = f"{self._b2_exe} {njobs} --abbreviate-paths"
             command += f" -d{self.options.debug_level}"
             self.output.warning(command)
             self.run(command)
@@ -1143,8 +1176,6 @@ class BoostConan(ConanFile):
             self._build_bcp()
             self._run_bcp()
 
-        self._create_user_config_jam(self._boost_build_dir)
-
         # JOIN ALL FLAGS
         b2_flags = " ".join(self._build_flags)
         full_command = f"{self._b2_exe} {b2_flags}"
@@ -1161,41 +1192,26 @@ class BoostConan(ConanFile):
             self.run(full_command)
 
     @property
-    def _b2_os(self):
-        return {
-            "Windows": "windows",
-            "WindowsStore": "windows",
-            "Linux": "linux",
-            "Android": "android",
-            "Macos": "darwin",
-            "iOS": "iphone",
-            "watchOS": "iphone",
-            "tvOS": "appletv",
-            "FreeBSD": "freebsd",
-            "SunOS": "solaris",
-        }.get(str(self.settings.os))
-
-    @property
     def _b2_address_model(self):
         if self.settings.arch in ("x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3", "sparcv9", "s390x", "riscv64", "wasm64"):
             return "64"
 
         return "32"
 
-    @property
-    def _b2_binary_format(self):
-        return {
-            "Windows": "pe",
-            "WindowsStore": "pe",
-            "Linux": "elf",
-            "Android": "elf",
-            "Macos": "mach-o",
-            "iOS": "mach-o",
-            "watchOS": "mach-o",
-            "tvOS": "mach-o",
-            "FreeBSD": "elf",
-            "SunOS": "elf",
-        }.get(str(self.settings.os))
+    # @property
+    # def _b2_binary_format(self):
+    #     return {
+    #         "Windows": "pe",
+    #         "WindowsStore": "pe",
+    #         "Linux": "elf",
+    #         "Android": "elf",
+    #         "Macos": "mach-o",
+    #         "iOS": "mach-o",
+    #         "watchOS": "mach-o",
+    #         "tvOS": "mach-o",
+    #         "FreeBSD": "elf",
+    #         "SunOS": "elf",
+    #     }.get(str(self.settings.os))
 
     @property
     def _b2_architecture(self):
@@ -1218,41 +1234,56 @@ class BoostConan(ConanFile):
 
         return None
 
-    @property
-    def _b2_abi(self):
-        if str(self.settings.arch).startswith("x86"):
-            return "ms" if str(self.settings.os) in ["Windows", "WindowsStore"] else "sysv"
-        if str(self.settings.arch).startswith("ppc"):
-            return "sysv"
-        if str(self.settings.arch).startswith("arm"):
-            return "aapcs"
-        if str(self.settings.arch).startswith("mips"):
-            return "o32"
-        if str(self.settings.arch).startswith("riscv"):
-            return "sysv"
+    # @property
+    # def _b2_abi(self):
+    #     if str(self.settings.arch).startswith("x86"):
+    #         return "ms" if str(self.settings.os) in ["Windows", "WindowsStore"] else "sysv"
+    #     if str(self.settings.arch).startswith("ppc"):
+    #         return "sysv"
+    #     if str(self.settings.arch).startswith("arm"):
+    #         return "aapcs"
+    #     if str(self.settings.arch).startswith("mips"):
+    #         return "o32"
+    #     if str(self.settings.arch).startswith("riscv"):
+    #         return "sysv"
 
-        return None
+    #     return None
 
-    @property
-    def _gnu_cxx11_abi(self):
-        """Checks libcxx setting and returns value for the GNU C++11 ABI flag
-        _GLIBCXX_USE_CXX11_ABI= .  Returns None if C++ library cannot be
-        determined.
-        """
-        try:
-            if str(self.settings.compiler.libcxx) == "libstdc++":
-                return "0"
-            if str(self.settings.compiler.libcxx) == "libstdc++11":
-                return "1"
-        except ConanException:
-            pass
-        return None
+    # @property
+    # def _gnu_cxx11_abi(self):
+    #     """Checks libcxx setting and returns value for the GNU C++11 ABI flag
+    #     _GLIBCXX_USE_CXX11_ABI= .  Returns None if C++ library cannot be
+    #     determined.
+    #     """
+    #     try:
+    #         if str(self.settings.compiler.libcxx) == "libstdc++":
+    #             return "0"
+    #         if str(self.settings.compiler.libcxx) == "libstdc++11":
+    #             return "1"
+    #     except ConanException:
+    #         pass
+    #     return None
+
+    # @property
+    # def _b2_os(self):
+    #     return {
+    #         "Windows": "windows",
+    #         "WindowsStore": "windows",
+    #         "Linux": "linux",
+    #         "Android": "android",
+    #         "Macos": "darwin",
+    #         "iOS": "iphone",
+    #         "watchOS": "iphone",
+    #         "tvOS": "appletv",
+    #         "FreeBSD": "freebsd",
+    #         "SunOS": "solaris",
+    #     }.get(str(self.settings.os))
 
     @property
     def _build_flags(self):
         flags = []
-        if self._build_cross_flags:
-            flags.append(f'compileflags="{" ".join(self._build_cross_flags)}"')
+        #if self._build_cross_flags:
+        #    flags.append(f'compileflags="{" ".join(self._build_cross_flags)}"')
 
         # Stop at the first error. No need to continue building.
         flags.append("-q")
@@ -1260,24 +1291,23 @@ class BoostConan(ConanFile):
         if self.options.get_safe("numa"):
             flags.append("numa=on")
 
+        #if not self._is_apple_embedded_platform and self._b2_os:
+        #    flags.append(f"target-os={self._b2_os}")
+
         # https://www.boost.org/doc/libs/1_70_0/libs/context/doc/html/context/architectures.html
-        if not self._is_apple_embedded_platform and self._b2_os:
-            flags.append(f"target-os={self._b2_os}")
-        if self._b2_architecture:
-            flags.append(f"architecture={self._b2_architecture}")
-        if self._b2_address_model:
-            flags.append(f"address-model={self._b2_address_model}")
-        if self._b2_binary_format:
-            flags.append(f"binary-format={self._b2_binary_format}")
-        if self._b2_abi:
-            flags.append(f"abi={self._b2_abi}")
+        #if self._b2_binary_format:
+        #    flags.append(f"binary-format={self._b2_binary_format}")
+        # if self._b2_abi:
+        #     flags.append(f"abi={self._b2_abi}")
 
         flags.append(f"--layout={self.options.layout}")
-        flags.append(f"--user-config={os.path.join(self._boost_build_dir, 'user-config.jam')}")
-        flags.append(f"-sNO_ZLIB={'0' if self._with_zlib else '1'}")
-        flags.append(f"-sNO_BZIP2={'0' if self._with_bzip2 else '1'}")
-        flags.append(f"-sNO_LZMA={'0' if self._with_lzma else '1'}")
-        flags.append(f"-sNO_ZSTD={'0' if self._with_zstd else '1'}")
+        # flags.append(f"--user-config={os.path.join(self._boost_build_dir, 'user-config.jam')}")
+        flags.append(f"--user-config={os.path.join(self.generators_folder, 'user-config.jam')}")
+        flags.append(f"--project-config={os.path.join(self.generators_folder, 'project-config.jam')}")
+        #flags.append(f"-sNO_ZLIB={'0' if self._with_zlib else '1'}")
+        #flags.append(f"-sNO_BZIP2={'0' if self._with_bzip2 else '1'}")
+        #flags.append(f"-sNO_LZMA={'0' if self._with_lzma else '1'}")
+        #flags.append(f"-sNO_ZSTD={'0' if self._with_zstd else '1'}")
 
         if self.options.get_safe("i18n_backend_icu"):
             flags.append("boost.locale.icu=on")
@@ -1294,54 +1324,35 @@ class BoostConan(ConanFile):
             flags.append("boost.locale.iconv=off")
             flags.append("--disable-iconv")
 
-        def add_defines(library):
-            for define in self.dependencies[library].cpp_info.aggregated_components().defines:
-                flags.append(f"define={define}")
+        #def add_defines(library):
+        #    for define in self.dependencies[library].cpp_info.aggregated_components().defines:
+        #        flags.append(f"define={define}")
 
-        if self._with_zlib:
-            add_defines("zlib")
-        if self._with_bzip2:
-            add_defines("bzip2")
-        if self._with_lzma:
-            add_defines("xz_utils")
-        if self._with_zstd:
-            add_defines("zstd")
+        #if self._with_zlib:
+        #    add_defines("zlib")
+        #if self._with_bzip2:
+        #    add_defines("bzip2")
+        #if self._with_lzma:
+        #    add_defines("xz_utils")
+        #if self._with_zstd:
+        #    add_defines("zstd")
 
-        for define in self.conf.get("tools.build:defines", default=[], check_type=list):
-            flags.append(f"define={define}")
+        #for define in self.conf.get("tools.build:defines", default=[], check_type=list):
+        #    flags.append(f"define={define}")
 
-        if is_msvc(self):
-            flags.append(f"runtime-link={'static' if is_msvc_static_runtime(self) else 'shared'}")
-            flags.append(f"runtime-debugging={'on' if 'd' in msvc_runtime_flag(self) else 'off'}")
+        #if is_msvc(self):
+        #    flags.append(f"runtime-link={'static' if is_msvc_static_runtime(self) else 'shared'}")
+        #    flags.append(f"runtime-debugging={'on' if 'd' in msvc_runtime_flag(self) else 'off'}")
 
         # For details https://boostorg.github.io/build/manual/master/index.html
-        flags.append(f"threading={'single' if not self.options.multithreading else 'multi'}")
-        flags.append(f"visibility={self.options.visibility}")
+        #flags.append(f"threading={'single' if not self.options.multithreading else 'multi'}")
+        #flags.append(f"visibility={self.options.visibility}")
 
-        flags.append(f"link={'shared' if self._shared else 'static'}")
-        if self.settings.build_type == "Debug":
-            flags.append("variant=debug")
-        else:
-            flags.append("variant=release")
+
 
         for libname in self._configure_options:
             if not getattr(self.options, f"without_{libname}"):
                 flags.append(f"--with-{libname}")
-
-        flags.append(f"toolset={self._toolset}")
-
-        safe_cppstd = self.settings.get_safe("compiler.cppstd")
-        if safe_cppstd:
-            cppstd_version = self._cppstd_flag(safe_cppstd)
-            flags.append(f"cxxstd={cppstd_version}")
-            if "gnu" in safe_cppstd:
-                flags.append("cxxstd-dialect=gnu")
-        elif Version(self.version) >= "1.85.0" and self._has_cppstd_14_supported:
-            cppstd_version = self._cppstd_flag("14")
-            flags.append(f"cxxstd={cppstd_version}")
-        elif self._has_cppstd_11_supported:
-            cppstd_version = self._cppstd_flag("11")
-            flags.append(f"cxxstd={cppstd_version}")
 
         # LDFLAGS
         link_flags = []
@@ -1349,63 +1360,63 @@ class BoostConan(ConanFile):
         # CXX FLAGS
         cxx_flags = []
         # fPIC DEFINITION
-        if self._fPIC:
-            cxx_flags.append("-fPIC")
-        if self.settings.build_type == "RelWithDebInfo":
-            if self.settings.compiler == "gcc" or "clang" in str(self.settings.compiler):
-                cxx_flags.append("-g")
-            elif is_msvc(self):
-                cxx_flags.append("/Z7")
+        #if self._fPIC:
+        #    cxx_flags.append("-fPIC")
+        #if self.settings.build_type == "RelWithDebInfo":
+        #    if self.settings.compiler == "gcc" or "clang" in str(self.settings.compiler):
+        #        cxx_flags.append("-g")
+        #    elif is_msvc(self):
+        #        cxx_flags.append("/Z7")
 
         # Standalone toolchain fails when declare the std lib
-        if self.settings.os not in ("Android", "Emscripten"):
-            try:
-                if self._gnu_cxx11_abi:
-                    flags.append(f"define=_GLIBCXX_USE_CXX11_ABI={self._gnu_cxx11_abi}")
+        #if self.settings.os not in ("Android", "Emscripten"):
+        #    try:
+            #     if self._gnu_cxx11_abi:
+            #         flags.append(f"define=_GLIBCXX_USE_CXX11_ABI={self._gnu_cxx11_abi}")
 
-                if self.settings.compiler in ("clang", "apple-clang"):
-                    libcxx = {
-                        "libstdc++11": "libstdc++",
-                    }.get(str(self.settings.compiler.libcxx), str(self.settings.compiler.libcxx))
-                    cxx_flags.append(f"-stdlib={libcxx}")
-                    link_flags.append(f"-stdlib={libcxx}")
-            except ConanException:
-                pass
+            #     if self.settings.compiler in ("clang", "apple-clang"):
+            #         libcxx = {
+            #             "libstdc++11": "libstdc++",
+            #         }.get(str(self.settings.compiler.libcxx), str(self.settings.compiler.libcxx))
+            #         cxx_flags.append(f"-stdlib={libcxx}")
+            #         link_flags.append(f"-stdlib={libcxx}")
+            # except ConanException:
+            #     pass
 
-        if self.options.error_code_header_only:
-            flags.append("define=BOOST_ERROR_CODE_HEADER_ONLY=1")
-        if self.options.system_no_deprecated:
-            flags.append("define=BOOST_SYSTEM_NO_DEPRECATED=1")
-        if self.options.asio_no_deprecated:
-            flags.append("define=BOOST_ASIO_NO_DEPRECATED=1")
-        if self.options.filesystem_no_deprecated:
-            flags.append("define=BOOST_FILESYSTEM_NO_DEPRECATED=1")
-        if self.options.filesystem_use_std_fs:
-            flags.append("define=BOOST_DLL_USE_STD_FS=1")
-        if self.options.system_use_utf8:
-            flags.append("define=BOOST_SYSTEM_USE_UTF8=1")
-        if self.options.segmented_stacks:
-            flags.extend(["segmented-stacks=on",
-                          "define=BOOST_USE_SEGMENTED_STACKS=1",
-                          "define=BOOST_USE_UCONTEXT=1"])
-        flags.append("pch=on" if self.options.pch else "pch=off")
+        #if self.options.error_code_header_only:
+        #    flags.append("define=BOOST_ERROR_CODE_HEADER_ONLY=1")
+        #if self.options.system_no_deprecated:
+        #    flags.append("define=BOOST_SYSTEM_NO_DEPRECATED=1")
+        #if self.options.asio_no_deprecated:
+        #    flags.append("define=BOOST_ASIO_NO_DEPRECATED=1")
+        #if self.options.filesystem_no_deprecated:
+        #    flags.append("define=BOOST_FILESYSTEM_NO_DEPRECATED=1")
+        #if self.options.filesystem_use_std_fs:
+        #    flags.append("define=BOOST_DLL_USE_STD_FS=1")
+        #if self.options.system_use_utf8:
+        #    flags.append("define=BOOST_SYSTEM_USE_UTF8=1")
+        #if self.options.segmented_stacks:
+        #    flags.extend(["segmented-stacks=on",
+        #                  "define=BOOST_USE_SEGMENTED_STACKS=1",
+        #                  "define=BOOST_USE_UCONTEXT=1"])
+        #flags.append("pch=on" if self.options.pch else "pch=off")
 
-        if is_apple_os(self):
-            apple_min_version_flag = AutotoolsToolchain(self).apple_min_version_flag
-            if apple_min_version_flag:
-                cxx_flags.append(apple_min_version_flag)
-                link_flags.append(apple_min_version_flag)
-            os_subsystem = self.settings.get_safe("os.subsystem")
-            if os_subsystem == "catalyst":
-                cxx_flags.append("--target=arm64-apple-ios-macabi")
-                link_flags.append("--target=arm64-apple-ios-macabi")
+        #if is_apple_os(self):
+        #    apple_min_version_flag = AutotoolsToolchain(self).apple_min_version_flag
+        #    if apple_min_version_flag:
+        #        cxx_flags.append(apple_min_version_flag)
+        #        link_flags.append(apple_min_version_flag)
+        #    os_subsystem = self.settings.get_safe("os.subsystem")
+        #    if os_subsystem == "catalyst":
+        #        cxx_flags.append("--target=arm64-apple-ios-macabi")
+        #        link_flags.append("--target=arm64-apple-ios-macabi")
 
         if self.settings.os == "iOS":
             if self.options.multithreading:
                 cxx_flags.append("-DBOOST_SP_USE_SPINLOCK")
 
-            if self.conf.get("tools.apple:enable_bitcode", check_type=bool):
-                cxx_flags.append("-fembed-bitcode")
+            #if self.conf.get("tools.apple:enable_bitcode", check_type=bool):
+            #    cxx_flags.append("-fembed-bitcode")
         if self._with_stacktrace_backtrace:
             flags.append(f"-sLIBBACKTRACE_PATH={self.dependencies['libbacktrace'].package_folder}")
         if self._stacktrace_from_exception_available and "x86" not in str(self.settings.arch):
@@ -1453,233 +1464,136 @@ class BoostConan(ConanFile):
             f"--prefix={self.package_folder}",
             njobs,
             "--abbreviate-paths",
-            f"-d{self.options.debug_level}",
+            #f"-d{self.options.debug_level}",
         ])
+
+        flags.extend(["-a", "-d2", "--debug-configuration"])
         return flags
 
-    @property
-    def _build_cross_flags(self):
-        flags = []
-        if not cross_building(self):
-            return flags
-        arch = self.settings.get_safe("arch")
-        self.output.info("Cross building, detecting compiler...")
+    # @property
+    # def _build_cross_flags(self):
+    #     flags = []
+    #     if not cross_building(self):
+    #         return flags
+    #     arch = self.settings.get_safe("arch")
+    #     self.output.info("Cross building, detecting compiler...")
 
-        if arch.startswith("arm"):
-            if "hf" in arch:
-                flags.append("-mfloat-abi=hard")
-        elif self.settings.os == "Emscripten":
-            pass
-        elif arch in ["x86", "x86_64"]:
-            pass
-        elif arch.startswith("ppc"):
-            pass
-        elif arch.startswith("mips"):
-            pass
-        elif arch.startswith("riscv"):
-            pass
-        else:
-            self.output.warning(f"Unable to detect the appropriate ABI for {arch} architecture.")
-        self.output.info(f"Cross building flags: {flags}")
+    #     if arch.startswith("arm"):
+    #         if "hf" in arch:
+    #             flags.append("-mfloat-abi=hard")
+    #     elif self.settings.os == "Emscripten":
+    #         pass
+    #     elif arch in ["x86", "x86_64"]:
+    #         pass
+    #     elif arch.startswith("ppc"):
+    #         pass
+    #     elif arch.startswith("mips"):
+    #         pass
+    #     elif arch.startswith("riscv"):
+    #         pass
+    #     else:
+    #         self.output.warning(f"Unable to detect the appropriate ABI for {arch} architecture.")
+    #     self.output.info(f"Cross building flags: {flags}")
 
-        return flags
+    #     return flags
 
-    @property
-    def _ar(self):
-        ar = VirtualBuildEnv(self).vars().get("AR")
-        if ar:
-            return ar
-        if is_apple_os(self) and self.settings.compiler == "apple-clang":
-            return XCRun(self).ar
-        return None
+    # @property
+    # def _ar(self):
+    #     ar = VirtualBuildEnv(self).vars().get("AR")
+    #     if ar:
+    #         return ar
+    #     if is_apple_os(self) and self.settings.compiler == "apple-clang":
+    #         return XCRun(self).ar
+    #     return None
 
-    @property
-    def _ranlib(self):
-        ranlib = VirtualBuildEnv(self).vars().get("RANLIB")
-        if ranlib:
-            return ranlib
-        if is_apple_os(self) and self.settings.compiler == "apple-clang":
-            return XCRun(self).ranlib
-        return None
+    # @property
+    # def _ranlib(self):
+    #     ranlib = VirtualBuildEnv(self).vars().get("RANLIB")
+    #     if ranlib:
+    #         return ranlib
+    #     if is_apple_os(self) and self.settings.compiler == "apple-clang":
+    #         return XCRun(self).ranlib
+    #     return None
 
-    @property
-    def _cxx(self):
-        compilers_by_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
-        cxx = compilers_by_conf.get("cpp") or VirtualBuildEnv(self).vars().get("CXX")
-        if cxx:
-            return cxx
-        if is_apple_os(self) and self.settings.compiler == "apple-clang":
-            return XCRun(self).cxx
-        compiler_version = str(self.settings.compiler.version)
-        major = compiler_version.split(".", maxsplit=1)[0]
-        if self.settings.compiler == "gcc":
-            return shutil.which(f"g++-{compiler_version}") or shutil.which(f"g++-{major}") or shutil.which("g++") or ""
-        if self.settings.compiler == "clang":
-            return shutil.which(f"clang++-{compiler_version}") or shutil.which(f"clang++-{major}") or shutil.which("clang++") or ""
-        return ""
+    # @property
+    # def _cxx(self):
+    #     compilers_by_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+    #     cxx = compilers_by_conf.get("cpp") or VirtualBuildEnv(self).vars().get("CXX")
+    #     if cxx:
+    #         return cxx
+    #     if is_apple_os(self) and self.settings.compiler == "apple-clang":
+    #         return XCRun(self).cxx
+    #     compiler_version = str(self.settings.compiler.version)
+    #     major = compiler_version.split(".", maxsplit=1)[0]
+    #     if self.settings.compiler == "gcc":
+    #         return shutil.which(f"g++-{compiler_version}") or shutil.which(f"g++-{major}") or shutil.which("g++") or ""
+    #     if self.settings.compiler == "clang":
+    #         return shutil.which(f"clang++-{compiler_version}") or shutil.which(f"clang++-{major}") or shutil.which("clang++") or ""
+    #     return ""
 
-    def _create_user_config_jam(self, folder):
-        self.output.warning("Patching user-config.jam")
+    # @property
+    # def _toolset_version(self):
+    #     toolset = MSBuildToolchain(self).toolset
+    #     if toolset:
+    #         match = re.match(r"v(\d+)(\d)$", toolset)
+    #         if match:
+    #             return f"{match.group(1)}.{match.group(2)}"
+    #     return ""
 
-        def create_library_config(deps_name, name):
-            aggregated_cpp_info = self.dependencies[deps_name].cpp_info.aggregated_components()
-            if len(aggregated_cpp_info.libs) == 0:
-                return ""
+    # @property
+    # def _toolset(self):
+    #     if is_msvc(self):
+    #         return "clang-win" if self.settings.compiler.get_safe("toolset") == "ClangCL" else "msvc"
+    #     if self.settings.os == "Windows" and self.settings.compiler == "clang":
+    #         return "clang-win"
+    #     if self.settings.os == "Emscripten" and self.settings.compiler in ("clang", "emcc"):
+    #         return "emscripten"
+    #     if self.settings.compiler == "gcc" and is_apple_os(self):
+    #         return "darwin"
+    #     if self.settings.compiler == "apple-clang":
+    #         return "clang-darwin"
+    #     if self.settings.os == "Android" and self.settings.compiler == "clang":
+    #         return "clang-linux"
+    #     if self.settings.compiler in ["clang", "gcc"]:
+    #         return str(self.settings.compiler)
+    #     if self.settings.compiler == "sun-cc":
+    #         return "sunpro"
+    #     if "intel" in str(self.settings.compiler):
+    #         return {
+    #             "Macos": "intel-darwin",
+    #             "Windows": "intel-win",
+    #             "Linux": "intel-linux",
+    #         }[str(self.settings.os)]
 
-            includedir = aggregated_cpp_info.includedirs[0].replace("\\", "/")
-            includedir = f"\"{includedir}\""
-            libdir = aggregated_cpp_info.libdirs[0].replace("\\", "/")
-            libdir = f"\"{libdir}\""
-            lib = aggregated_cpp_info.libs[0]
-            version = self.dependencies[deps_name].ref.version
-            return f"\nusing {name} : {version} : " \
-                   f"<include>{includedir} " \
-                   f"<search>{libdir} " \
-                   f"<name>{lib} ;"
+    #     return str(self.settings.compiler)
 
-        contents = ""
+    # @property
+    # def _toolset_tag(self):
+    #     # compiler       | compiler.version | os          | toolset_tag    | remark
+    #     # ---------------+------------------+-------------+----------------+-----------------------------
+    #     # apple-clang    | 12               | Macos       | darwin12       |
+    #     # clang          | 12               | Macos       | clang-darwin12 |
+    #     # gcc            | 11               | Linux       | gcc8           |
+    #     # gcc            | 8                | Windows     | mgw8           |
+    #     # Visual Studio  | 17               | Windows     | vc142          | depends on compiler.toolset
+    #     compiler = {
+    #         "apple-clang": "",
+    #         "Visual Studio": "vc",
+    #         "msvc": "vc",
+    #     }.get(str(self.settings.compiler), str(self.settings.compiler))
+    #     if (self.settings.compiler, self.settings.os) == ("gcc", "Windows"):
+    #         compiler = "mgw"
+    #     os_ = ""
+    #     if self.settings.os == "Macos":
+    #         os_ = "darwin"
+    #     if is_msvc(self):
+    #         toolset_version = self._toolset_version.replace(".", "")
+    #     else:
+    #         toolset_version = str(Version(self.settings.compiler.version).major)
 
-        if self._with_zlib:
-            contents += create_library_config("zlib", "zlib")
-        if self._with_bzip2:
-            contents += create_library_config("bzip2", "bzip2")
-        if self._with_lzma:
-            contents += create_library_config("xz_utils", "lzma")
-        if self._with_zstd:
-            contents += create_library_config("zstd", "zstd")
-
-        if not self.options.without_python:
-            # https://www.boost.org/doc/libs/1_70_0/libs/python/doc/html/building/configuring_boost_build.html
-            contents += f'\nusing python : {self._python_version} : "{self._python_executable}" : "{self._python_includes}" : "{self._python_library_dir}" ;'
-
-        if not self.options.without_mpi:
-            # https://www.boost.org/doc/libs/1_72_0/doc/html/mpi/getting_started.html
-            contents += "\nusing mpi ;"
-
-        # Specify here the toolset with the binary if present if don't empty parameter :
-        contents += f'\nusing "{self._toolset}" : {self._toolset_version} : '
-
-        cxx_fwd_slahes = self._cxx.replace("\\", "/")
-        if cxx_fwd_slahes:
-            contents += f" \"{cxx_fwd_slahes}\""
-
-        if is_apple_os(self):
-            if self.settings.compiler == "apple-clang":
-                contents += f" -isysroot {XCRun(self).sdk_path}"
-            if self.settings.get_safe("arch"):
-                contents += f" -arch {to_apple_arch(self)}"
-
-        contents += " : \n"
-        if self._ar:
-            ar_path = self._ar.replace("\\", "/")
-            contents += f'<archiver>"{ar_path}" '
-        if self._ranlib:
-            ranlib_path = self._ranlib.replace("\\", "/")
-            contents += f'<ranlib>"{ranlib_path}" '
-        cxxflags = " ".join(self.conf.get("tools.build:cxxflags", default=[], check_type=list)) + " "
-        cflags = " ".join(self.conf.get("tools.build:cflags", default=[], check_type=list)) + " "
-        buildenv_vars = VirtualBuildEnv(self).vars()
-        cppflags = buildenv_vars.get("CPPFLAGS", "") + " "
-        ldflags = " ".join(self.conf.get("tools.build:sharedlinkflags", default=[], check_type=list)) + " "
-        asflags = buildenv_vars.get("ASFLAGS", "") + " "
-
-        sysroot = self.conf.get("tools.build:sysroot")
-        if sysroot and not is_msvc(self):
-            sysroot = sysroot.replace("\\", "/")
-            sysroot = f'"{sysroot}"' if ' ' in sysroot else sysroot
-            cppflags += f"--sysroot={sysroot} "
-            ldflags += f"--sysroot={sysroot} "
-
-        if self._with_stacktrace_backtrace:
-            backtrace_aggregated_cpp_info = self.dependencies["libbacktrace"].cpp_info.aggregated_components()
-            cppflags += " ".join(f"-I{p}" for p in backtrace_aggregated_cpp_info.includedirs) + " "
-            ldflags += " ".join(f"-L{p}" for p in backtrace_aggregated_cpp_info.libdirs) + " "
-
-        if cxxflags.strip():
-            contents += f'<cxxflags>"{cxxflags.strip()}" '
-        if cflags.strip():
-            contents += f'<cflags>"{cflags.strip()}" '
-        if cppflags.strip() or self._build_cross_flags:
-            compiler_flags = cppflags.strip() + " "
-            compiler_flags += " ".join(self._build_cross_flags)
-            contents += f'<compileflags>"{compiler_flags}" '
-        if ldflags.strip():
-            contents += f'<linkflags>"{ldflags.strip()}" '
-        if asflags.strip():
-            contents += f'<asmflags>"{asflags.strip()}" '
-
-        if self._is_apple_embedded_platform:
-            contents += f'<target-os>"{self._b2_os}" '
-
-        contents += " ;"
-
-        self.output.warning(contents)
-        filename = f"{folder}/user-config.jam"
-        save(self, filename, contents)
-
-    @property
-    def _toolset_version(self):
-        toolset = MSBuildToolchain(self).toolset
-        if toolset:
-            match = re.match(r"v(\d+)(\d)$", toolset)
-            if match:
-                return f"{match.group(1)}.{match.group(2)}"
-        return ""
-
-    @property
-    def _toolset(self):
-        if is_msvc(self):
-            return "clang-win" if self.settings.compiler.get_safe("toolset") == "ClangCL" else "msvc"
-        if self.settings.os == "Windows" and self.settings.compiler == "clang":
-            return "clang-win"
-        if self.settings.os == "Emscripten" and self.settings.compiler in ("clang", "emcc"):
-            return "emscripten"
-        if self.settings.compiler == "gcc" and is_apple_os(self):
-            return "darwin"
-        if self.settings.compiler == "apple-clang":
-            return "clang-darwin"
-        if self.settings.os == "Android" and self.settings.compiler == "clang":
-            return "clang-linux"
-        if self.settings.compiler in ["clang", "gcc"]:
-            return str(self.settings.compiler)
-        if self.settings.compiler == "sun-cc":
-            return "sunpro"
-        if "intel" in str(self.settings.compiler):
-            return {
-                "Macos": "intel-darwin",
-                "Windows": "intel-win",
-                "Linux": "intel-linux",
-            }[str(self.settings.os)]
-
-        return str(self.settings.compiler)
-
-    @property
-    def _toolset_tag(self):
-        # compiler       | compiler.version | os          | toolset_tag    | remark
-        # ---------------+------------------+-------------+----------------+-----------------------------
-        # apple-clang    | 12               | Macos       | darwin12       |
-        # clang          | 12               | Macos       | clang-darwin12 |
-        # gcc            | 11               | Linux       | gcc8           |
-        # gcc            | 8                | Windows     | mgw8           |
-        # Visual Studio  | 17               | Windows     | vc142          | depends on compiler.toolset
-        compiler = {
-            "apple-clang": "",
-            "Visual Studio": "vc",
-            "msvc": "vc",
-        }.get(str(self.settings.compiler), str(self.settings.compiler))
-        if (self.settings.compiler, self.settings.os) == ("gcc", "Windows"):
-            compiler = "mgw"
-        os_ = ""
-        if self.settings.os == "Macos":
-            os_ = "darwin"
-        if is_msvc(self):
-            toolset_version = self._toolset_version.replace(".", "")
-        else:
-            toolset_version = str(Version(self.settings.compiler.version).major)
-
-        toolset_parts = [compiler, os_]
-        toolset_tag = "-".join(part for part in toolset_parts if part) + toolset_version
-        return toolset_tag
+    #     toolset_parts = [compiler, os_]
+    #     toolset_tag = "-".join(part for part in toolset_parts if part) + toolset_version
+    #     return toolset_tag
 
     ####################################################################
 
@@ -1881,11 +1795,10 @@ class BoostConan(ConanFile):
             # - tagged: "-mt-d-x64"
             libsuffix_lut = {
                 "system": "",
-                "versioned": "{toolset}{threading}{abi}{arch}{version}",
+                "versioned": "{threading}{abi}{arch}{version}",
                 "tagged": "{threading}{abi}{arch}",
             }
             libsuffix_data = {
-                "toolset": f"-{self._toolset_tag}",
                 "threading": "-mt" if self.options.multithreading else "",
                 "abi": "",
                 "ach": "",
@@ -1927,7 +1840,7 @@ class BoostConan(ConanFile):
                 libprefix = ""
                 if is_msvc(self) and (not self._shared or n in self._dependencies["static_only"]):
                     libprefix = "lib"
-                elif self._toolset == "clang-win":
+                elif self.settings.os == "Windows" and self.settings.compiler == "clang":
                     libprefix = "lib"
                 return libprefix + n
 
