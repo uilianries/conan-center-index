@@ -68,7 +68,7 @@ class LibgdConan(ConanFile):
             if is_msvc(self):
                 self.requires("getopt-for-visual-studio/20200201")
         if self.options.with_jpeg:
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         if self.options.with_tiff:
             self.requires("libtiff/4.6.0")
         if self.options.with_freetype:

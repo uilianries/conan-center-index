@@ -66,7 +66,7 @@ class CImgConan(ConanFile):
         if self.options.enable_fftw:
             self.requires("fftw/3.3.10")
         if self.options.enable_jpeg:
-            self.requires("libjpeg/[>=9f]")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         if self.options.enable_openexr:
             self.requires("openexr/[>=3.2.1 <4]")
         if self.options.enable_png:

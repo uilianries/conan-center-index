@@ -26,13 +26,13 @@ class DjVuLibreConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "tools": [True, False],
-        "with_libjpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"],
+        "with_libjpeg": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "tools": False,
-        "with_libjpeg": "libjpeg",
+        "with_libjpeg": True,
     }
 
     @property
@@ -55,12 +55,8 @@ class DjVuLibreConan(ConanFile):
 
     def requirements(self):
         self.requires("libiconv/1.17")
-        if self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/[>=9e]")
-        elif self.options.with_libjpeg == "libjpeg-turbo":
+        if self.options.with_libjpeg:
             self.requires("libjpeg-turbo/[>=3.0.2 <4]")
-        elif self.options.with_libjpeg == "mozjpeg":
-            self.requires("mozjpeg/[>=4.1.5 <5]")
         self.requires("libtiff/[>=4.6.0 <5]")
 
     def validate(self):

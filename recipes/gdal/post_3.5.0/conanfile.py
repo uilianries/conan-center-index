@@ -45,7 +45,7 @@ class GdalConan(ConanFile):
         "with_hdf4": [True, False],
         "with_hdf5": [True, False],
         "with_heif": [True, False],
-        "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
+        "with_jpeg": [True, False],
         "with_jxl": [True, False],
         "with_kea": [True, False],
         "with_lerc": [True, False],
@@ -108,7 +108,7 @@ class GdalConan(ConanFile):
         "with_hdf4": False,
         "with_hdf5": False,
         "with_heif": False,
-        "with_jpeg": "libjpeg",
+        "with_jpeg": True,
         "with_jxl": False,
         "with_kea": False,
         "with_lerc": True,
@@ -219,10 +219,8 @@ class GdalConan(ConanFile):
             self.requires("hdf5/1.14.3")
         if self.options.with_heif:
             self.requires("libheif/1.16.2")
-        if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/[>=9e]")
-        elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.1")
+        if self.options.with_jpeg:
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         if self.options.with_jxl:
             self.requires("libjxl/0.6.1")
         if self.options.with_kea:
@@ -731,9 +729,7 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["libdeflate::libdeflate"])
         if self.options.with_libiconv:
             self.cpp_info.requires.extend(["libiconv::libiconv"])
-        if self.options.with_jpeg == "libjpeg":
-            self.cpp_info.requires.extend(["libjpeg::libjpeg"])
-        elif self.options.with_jpeg == "libjpeg-turbo":
+        if self.options.with_jpeg == "libjpeg-turbo":
             self.cpp_info.requires.extend(["libjpeg-turbo::turbojpeg"])
         if self.options.with_libkml:
             self.cpp_info.requires.extend(["libkml::kmldom", "libkml::kmlengine"])

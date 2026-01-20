@@ -70,7 +70,7 @@ class LibheifConan(ConanFile):
         if self.options.with_dav1d:
             self.requires("dav1d/[>=1.4 <2]")
         if self.options.get_safe("with_jpeg"):
-            self.requires("libjpeg/[>=9f]")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         if self.options.get_safe("with_openjpeg"):
             self.requires("openjpeg/[>=2.5.2 <3]")
         if self.options.get_safe("with_openjph"):
@@ -166,7 +166,7 @@ class LibheifConan(ConanFile):
         if self.options.with_dav1d:
             self.cpp_info.requires.append("dav1d::dav1d")
         if self.options.get_safe("with_jpeg"):
-            self.cpp_info.requires.append("libjpeg::libjpeg")
+            self.cpp_info.requires.append("libjpeg-turbo::jpeg")
         if self.options.get_safe("with_openjpeg"):
             self.cpp_info.requires.append("openjpeg::openjpeg")
         if self.options.get_safe("with_openjph"):

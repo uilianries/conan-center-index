@@ -23,7 +23,7 @@ class LibtiffConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "lzma": [True, False],
-        "jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
+        "jpeg": [True, False],
         "zlib": [True, False],
         "libdeflate": [True, False],
         "zstd": [True, False],
@@ -35,7 +35,7 @@ class LibtiffConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "lzma": True,
-        "jpeg": "libjpeg",
+        "jpeg": True,
         "zlib": True,
         "libdeflate": False,
         "zstd": False,
@@ -68,12 +68,8 @@ class LibtiffConan(ConanFile):
             self.requires("libdeflate/[>=1.19 <2]")
         if self.options.lzma:
             self.requires("xz_utils/[>=5.4.5 <6]")
-        if self.options.jpeg == "libjpeg":
-            self.requires("libjpeg/[>=9e]")
-        elif self.options.jpeg == "libjpeg-turbo":
+        if self.options.jpeg:
             self.requires("libjpeg-turbo/[>=3.0.2 <4]")
-        elif self.options.jpeg == "mozjpeg":
-            self.requires("mozjpeg/[>=4.1.5 <5]")
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.zstd:
@@ -114,7 +110,7 @@ class LibtiffConan(ConanFile):
         # BUILD_SHARED_LIBS must be set in command line because defined upstream before project()
         tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
         tc.cache_variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = True
-        tc.cache_variables["HAVE_JPEGTURBO_DUAL_MODE_8_12"] = self.options.jpeg == "libjpeg-turbo"
+        tc.cache_variables["HAVE_JPEGTURBO_DUAL_MODE_8_12"] = self.options.jpeg
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("jbig", "cmake_file_name", "JBIG")
@@ -169,12 +165,8 @@ class LibtiffConan(ConanFile):
             self.cpp_info.requires.append("libdeflate::libdeflate")
         if self.options.lzma:
             self.cpp_info.requires.append("xz_utils::xz_utils")
-        if self.options.jpeg == "libjpeg":
-            self.cpp_info.requires.append("libjpeg::libjpeg")
-        elif self.options.jpeg == "libjpeg-turbo":
+        if self.options.jpeg:
             self.cpp_info.requires.append("libjpeg-turbo::jpeg")
-        elif self.options.jpeg == "mozjpeg":
-            self.cpp_info.requires.append("mozjpeg::libjpeg")
         if self.options.jbig:
             self.cpp_info.requires.append("jbig::jbig")
         if self.options.zstd:

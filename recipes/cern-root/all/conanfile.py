@@ -83,7 +83,7 @@ class CernRootConan(ConanFile):
         self.requires("glew/2.2.0")
         self.requires("glu/system")
         self.requires("libcurl/7.78.0")
-        self.requires("libjpeg/9d")
+        self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         self.requires("libpng/1.6.37")
         self.requires("libxml2/2.9.12")
         self.requires("lz4/1.9.3")

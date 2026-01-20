@@ -26,7 +26,7 @@ class LeptonicaConan(ConanFile):
         "fPIC": [True, False],
         "with_zlib": [True, False],
         "with_gif": [True, False],
-        "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
+        "with_jpeg": [True, False],
         "with_png": [True, False],
         "with_tiff": [True, False],
         "with_openjpeg": [True, False],
@@ -37,7 +37,7 @@ class LeptonicaConan(ConanFile):
         "fPIC": True,
         "with_zlib": True,
         "with_gif": True,
-        "with_jpeg": "libjpeg",
+        "with_jpeg": True,
         "with_png": True,
         "with_tiff": True,
         "with_openjpeg": True,
@@ -56,10 +56,6 @@ class LeptonicaConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-        if bool(self.options.with_jpeg):
-            self.options["*"].jpeg = self.options.with_jpeg
-            self.options["*"].with_jpeg = self.options.with_jpeg
-            self.options["*"].with_libjpeg = self.options.with_jpeg
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -69,12 +65,8 @@ class LeptonicaConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
-        if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/[>=9e]")
-        elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
-        elif self.options.with_jpeg == "mozjpeg":
-            self.requires("mozjpeg/[>=4.1.5 <5]")
+        if self.options.with_jpeg:
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")        
         if self.options.with_png:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_tiff:

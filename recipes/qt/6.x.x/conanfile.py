@@ -50,7 +50,7 @@ class QtConan(ConanFile):
         "with_fontconfig": [True, False],
         "with_icu": [True, False],
         "with_harfbuzz": [True, False],
-        "with_libjpeg": ["libjpeg", "libjpeg-turbo", False],
+        "with_libjpeg": [True, False],
         "with_libpng": [True, False],
         "with_sqlite3": [True, False],
         "with_mysql": [True, False],
@@ -369,10 +369,8 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
             self.requires("harfbuzz/[>=8.3.0]")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
-            if self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/[>=3.0 <3.1]")
-            else:
-                self.requires("libjpeg/[>=9e]")
+            if self.options.with_libjpeg:
+                self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
@@ -1256,10 +1254,8 @@ class QtConan(ConanFile):
             _create_plugin("QIcoPlugin", "qico", "imageformats", ["Gui"])
             if self.options.get_safe("with_libjpeg"):
                 jpeg_reqs = ["Gui"]
-                if self.options.with_libjpeg == "libjpeg-turbo":
+                if self.options.with_libjpeg:
                     jpeg_reqs.append("libjpeg-turbo::libjpeg-turbo")
-                if self.options.with_libjpeg == "libjpeg":
-                    jpeg_reqs.append("libjpeg::libjpeg")
                 _create_plugin("QJpegPlugin", "qjpeg", "imageformats", jpeg_reqs)
 
         if self.options.with_mysql:

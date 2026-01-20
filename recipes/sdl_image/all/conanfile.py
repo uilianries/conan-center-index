@@ -88,7 +88,7 @@ class SDLImageConan(ConanFile):
         if self.options.with_libtiff:
             self.requires("libtiff/4.6.0")
         if self.options.with_libjpeg:
-            self.requires("libjpeg/[>=9e]")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         if self.options.with_libpng:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_libwebp:
@@ -183,7 +183,7 @@ class SDLImageConan(ConanFile):
         if self.options.with_libtiff:
             self.cpp_info.components["_sdl_image"].requires.append("libtiff::libtiff")
         if self.options.with_libjpeg:
-            self.cpp_info.components["_sdl_image"].requires.append("libjpeg::libjpeg")
+            self.cpp_info.components["_sdl_image"].requires.append("libjpeg-turbo::libjpeg-turbo")
         if self.options.with_libpng:
             self.cpp_info.components["_sdl_image"].requires.append("libpng::libpng")
         if self.options.with_libwebp:

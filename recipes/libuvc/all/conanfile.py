@@ -23,12 +23,12 @@ class LibuvcConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
+        "with_jpeg": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_jpeg": "libjpeg",
+        "with_jpeg": True,
     }
 
     def export_sources(self):
@@ -49,12 +49,8 @@ class LibuvcConan(ConanFile):
 
     def requirements(self):
         self.requires("libusb/1.0.26")
-        if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
-        elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
-        elif self.options.with_jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.3")
+        if self.options.with_jpeg:
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
 
     def validate(self):
         if is_msvc(self):
@@ -114,11 +110,7 @@ class LibuvcConan(ConanFile):
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["_libuvc"].libs = ["uvc"]
         self.cpp_info.components["_libuvc"].requires = ["libusb::libusb"]
-        if self.options.with_jpeg == "libjpeg":
-            self.cpp_info.components["_libuvc"].requires.append("libjpeg::libjpeg")
-        elif self.options.with_jpeg == "libjpeg-turbo":
+        if self.options.with_jpeg:
             self.cpp_info.components["_libuvc"].requires.append("libjpeg-turbo::jpeg")
-        elif self.options.with_jpeg == "mozjpeg":
-            self.cpp_info.components["_libuvc"].requires.append("mozjpeg::libjpeg")
         self.cpp_info.components["_libuvc"].set_property("cmake_target_name", f"LibUVC::{cmake_target}")
         self.cpp_info.components["_libuvc"].set_property("pkg_config_name", "libuvc")

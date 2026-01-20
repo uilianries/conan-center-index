@@ -145,7 +145,7 @@ class MagnumConan(ConanFile):
         if self.options.freetype_font:
             self.requires("freetype/2.11.0")
         if self.options.jpeg_importer or self.options.jpeg_imageconverter:
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         if self.options.meshoptimizer_sceneconverter:
             self.requires("meshoptimizer/0.15")
         if self.options.png_imageconverter:
@@ -303,8 +303,8 @@ class MagnumConan(ConanFile):
             ("faad2_audioimporter", ("faad2_audioimporter", "--", "--", "--", [])), 
             ("freetype_font", ("freetype_font", "FreeTypeFont", "FreeTypeFont", "fonts", ["magnum::text", "freetype::freetype"])), 
             ("harfbuzz_font", ("harfbuzz_font", "HarfBuzzFont", "HarfBuzzFont", "fonts", ["magnum::text", "harfbuzz::harfbuzz"])), 
-            ("jpeg_imageconverter", ("jpeg_imageconverter", "JpegImageConverter", "JpegImageConverter", "imageconverters", ["magnum::trade", "libjpeg::libjpeg"])), 
-            ("jpeg_importer", ("jpeg_importer", "JpegImporter", "JpegImporter", "importers", ["magnum::trade", "libjpeg::libjpeg"])), 
+            ("jpeg_imageconverter", ("jpeg_imageconverter", "JpegImageConverter", "JpegImageConverter", "imageconverters", ["magnum::trade", "libjpeg-turbo::jpeg"])), 
+            ("jpeg_importer", ("jpeg_importer", "JpegImporter", "JpegImporter", "importers", ["magnum::trade", "libjpeg-turbo::jpeg"])), 
             ("meshoptimizer_sceneconverter", ("meshoptimizer_sceneconverter", "MeshOptimizerSceneConverter", "MeshOptimizerSceneConverter", "sceneconverters", ["magnum::trade", "magnum::mesh_tools", "meshoptimizer::meshoptimizer"])), 
             ("miniexr_imageconverter", ("miniexr_imageconverter", "MiniExrImageConverter", "MiniExrImageConverter", "imageconverters", ["magnum::trade"])), 
             ("opengex_importer", ("opengex_importer", "OpenGexImporter", "OpenGexImporter", "importers", ["magnum::trade", "magnumopenddl", "magnum::any_image_importer"])), 

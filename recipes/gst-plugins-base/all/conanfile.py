@@ -19,7 +19,7 @@ class GStPluginsBaseConan(ConanFile):
         "fPIC": [True, False],
         "with_libalsa": [True, False],
         "with_libpng": [True, False],
-        "with_libjpeg": [False, "libjpeg", "libjpeg-turbo"],
+        "with_libjpeg": [True, False],
         "with_graphene": [True, False],
         "with_pango": [True, False],
         "with_ogg": [True, False],
@@ -37,7 +37,7 @@ class GStPluginsBaseConan(ConanFile):
         "fPIC": True,
         "with_libalsa": True,
         "with_libpng": True,
-        "with_libjpeg": "libjpeg",
+        "with_libjpeg": True,
         "with_graphene": True,
         "with_pango": True,
         "with_ogg": True,
@@ -119,10 +119,8 @@ class GStPluginsBaseConan(ConanFile):
                 self.requires("graphene/1.10.8")
             if self.options.with_libpng:
                 self.requires("libpng/1.6.37")
-            if self.options.with_libjpeg == "libjpeg":
-                self.requires("libjpeg/9d")
-            elif self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/2.1.2")
+            if self.options.with_libjpeg:
+                self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         if self.options.with_ogg:
             self.requires("ogg/1.3.5")
         if self.options.with_opus:
@@ -452,9 +450,7 @@ class GStPluginsBaseConan(ConanFile):
                 self.cpp_info.components["gstopengl"].requires.append("graphene::graphene-gobject-1.0")
             if self.options.with_libpng:
                 self.cpp_info.components["gstopengl"].requires.append("libpng::libpng")
-            if self.options.with_libjpeg == "libjpeg":
-                self.cpp_info.components["gstopengl"].requires.append("libjpeg::libjpeg")
-            elif self.options.with_libjpeg == "libjpeg-turbo":
+            if self.options.with_libjpeg:
                 self.cpp_info.components["gstopengl"].requires.append("libjpeg-turbo::libjpeg-turbo")
             if self.options.get_safe("with_xorg"):
                 self.cpp_info.components["gstopengl"].requires.append("xorg::x11")

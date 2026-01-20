@@ -64,7 +64,7 @@ class ZbarConan(ConanFile):
     def requirements(self):
         self.requires("libiconv/1.17")
         if self.options.with_jpeg:
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         if self.options.with_imagemagick:
             self.requires("imagemagick/7.0.11-14")
         if self.options.with_gtk:

@@ -62,7 +62,7 @@ class ITKConan(ConanFile):
         self.requires("fftw/3.3.10")
         self.requires("gdcm/3.0.23")
         self.requires("hdf5/1.14.3")
-        self.requires("libjpeg/[>=9f]")
+        self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/4.6.0")
         self.requires("openjpeg/[>=2.5.2 <3]")
@@ -366,7 +366,7 @@ class ITKConan(ConanFile):
             "ITKIOGE": {"requires": ["ITKIOIPL", "ITKIOImageBase"]},
             "ITKIOGIPL": {"requires": ["ITKIOImageBase", "zlib::zlib"]},
             "ITKIOHDF5": {"requires": ["ITKIOImageBase", "hdf5::hdf5"]},
-            "ITKIOJPEG": {"requires": ["ITKIOImageBase", "libjpeg::libjpeg"]},
+            "ITKIOJPEG": {"requires": ["ITKIOImageBase", "libjpeg-turbo::jpeg"]},
             "ITKIOMeshBase": {
                 "requires": [
                     "ITKCommon", "ITKIOImageBase", "ITKMesh", "ITKQuadEdgeMesh",

@@ -23,7 +23,7 @@ class LibCVDConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_libjpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
+        "with_libjpeg": [True, False],
         "with_libpng": [True, False],
         "with_libtiff": [True, False],
         "with_ffmpeg": [True, False],
@@ -33,7 +33,7 @@ class LibCVDConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_libjpeg": "libjpeg",
+        "with_libjpeg": True,
         "with_libpng": True,
         "with_libtiff": True,
         # Build without video support by default
@@ -80,12 +80,8 @@ class LibCVDConan(ConanFile):
             # FIXME: libidc1394 seems to be missing raw1394 dependency
             # test_package fails with "undefined reference to `raw1394_new_handle'" etc
             self.requires("libdc1394/2.2.7")
-        if self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
-        elif self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/[>=9e]")
-        elif self.options.with_libjpeg == "mozjpeg":
-            self.requires("mozjpeg/[>=4.1.5 <5]")
+        if self.options.with_libjpeg:
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")        
         if self.options.with_libpng:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_libtiff:

@@ -30,7 +30,6 @@ class Openmvgconan(ConanFile):
         "with_openmp": [True, False],
         "with_avx": [False, "avx", "avx2"],
         "programs": [True, False],
-        "with_jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"]
     }
     default_options = {
         "shared": False,
@@ -38,7 +37,6 @@ class Openmvgconan(ConanFile):
         "with_openmp": False,
         "with_avx": False,
         "programs": True,
-        "with_jpeg": "libjpeg"
     }
 
     short_paths = True
@@ -68,12 +66,7 @@ class Openmvgconan(ConanFile):
         self.requires("coin-utils/2.11.9")
         self.requires("eigen/3.4.0", transitive_headers=True)
         self.requires("flann/1.9.2", transitive_headers=True, transitive_libs=True)
-        if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
-        elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/[>=3.0 <3.1]")
-        elif self.options.with_jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.1")
+        self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/4.6.0")
 
@@ -144,14 +137,6 @@ class Openmvgconan(ConanFile):
 
     @property
     def _openmvg_components(self):
-        def jpeg():
-            if self.options.with_jpeg == "libjpeg":
-                return ["libjpeg::libjpeg"]
-            elif self.options.with_jpeg == "libjpeg-turbo":
-                return ["libjpeg-turbo::jpeg"]
-            elif self.options.with_jpeg == "mozjpeg":
-                return ["mozjpeg::libjpeg"]
-
         return {
             "openmvg_camera": {
                 "target": "openMVG_camera",
@@ -184,7 +169,7 @@ class Openmvgconan(ConanFile):
             "openmvg_image": {
                 "target": "openMVG_image",
                 "libs": ["openMVG_image"],
-                "requires": ["openmvg_numeric", "libpng::libpng", "libtiff::libtiff"] + jpeg(),
+                "requires": ["openmvg_numeric", "libpng::libpng", "libtiff::libtiff", "libjpeg-turbo::libjpeg-turbo"],
             },
             "openmvg_linearprogramming": {
                 "target": "openMVG_linearProgramming",

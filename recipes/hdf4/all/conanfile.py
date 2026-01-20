@@ -29,7 +29,7 @@ class Hdf4Conan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "jpegturbo": False,
+        "jpegturbo": True,
         "szip_support": None,
         "szip_encoding": False,
     }
@@ -55,9 +55,7 @@ class Hdf4Conan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.jpegturbo:
-            self.requires("libjpeg-turbo/3.0.0")
-        else:
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         if self.options.szip_support == "with_libaec":
             self.requires("libaec/1.0.6")
         elif self.options.szip_support == "with_szip":
@@ -156,7 +154,7 @@ class Hdf4Conan(ConanFile):
         self.cpp_info.components["hdf"].libs = [self._get_decorated_lib("hdf")]
         self.cpp_info.components["hdf"].requires = [
             "zlib::zlib",
-            "libjpeg-turbo::libjpeg-turbo" if self.options.jpegturbo else "libjpeg::libjpeg",
+            "libjpeg-turbo::libjpeg-turbo",
         ]
         if self.options.szip_support == "with_libaec":
             self.cpp_info.components["hdf"].requires.append("libaec::libaec")

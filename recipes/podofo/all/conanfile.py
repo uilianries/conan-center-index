@@ -22,7 +22,7 @@ class PodofoConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_libidn": [True, False],
-        "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
+        "with_jpeg": [True, False],
         "with_tiff": [True, False],
         "with_png": [True, False],
         "with_unistring": [True, False],
@@ -31,7 +31,7 @@ class PodofoConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_libidn": True,
-        "with_jpeg": "libjpeg",
+        "with_jpeg": True,
         "with_tiff": True,
         "with_png": True,
         "with_unistring": True,
@@ -79,12 +79,8 @@ class PodofoConan(ConanFile):
         if self.options.with_libidn:
             self.requires("libidn/1.36")
 
-        if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/[>=9e]")
-        elif self.options.with_jpeg == "libjpeg-turbo":
+        if self.options.with_jpeg:
             self.requires("libjpeg-turbo/[>=3.0.2 <4]")
-        elif self.options.with_jpeg == "mozjpeg":
-            self.requires("mozjpeg/[>=4.1.5 <5]")
 
         if self.options.with_tiff:
             self.requires("libtiff/4.6.0")
@@ -157,4 +153,3 @@ class PodofoConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
-

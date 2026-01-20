@@ -65,7 +65,7 @@ class FltkConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("libjpeg/9e")
+        self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         self.requires("libpng/[>=1.6 <2]")
         # If Version >= 1.4.1, it also depends on FLTK_BACKEND_X11, but it's not introduced
         # in the recipe for now

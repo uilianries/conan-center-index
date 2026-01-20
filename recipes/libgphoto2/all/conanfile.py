@@ -61,7 +61,7 @@ class LibGphoto2(ConanFile):
         if self.options.with_libexif:
             self.requires("libexif/0.6.24")
         if self.options.with_libjpeg:
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
 
     def validate(self):
         if is_msvc(self):

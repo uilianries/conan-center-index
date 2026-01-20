@@ -53,7 +53,7 @@ class DevilConan(ConanFile):
         if self.options.with_png:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_jpeg:
-            self.requires("libjpeg/[>9e]")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         if self.options.with_tiff:
             self.requires("libtiff/[>4.7.0 <5]")
         if self.options.with_jasper:
@@ -128,7 +128,7 @@ class DevilConan(ConanFile):
         if self.options.with_png:
             il_requires.append("libpng::libpng")
         if self.options.with_jpeg:
-            il_requires.append("libjpeg::libjpeg")
+            il_requires.append("libjpeg-turbo::jpeg")
         if self.options.with_tiff:
             il_requires.append("libtiff::libtiff")
         if self.options.with_jasper:

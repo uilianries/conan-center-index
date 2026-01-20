@@ -80,7 +80,7 @@ class PopplerConan(ConanFile):
         self.requires("libiconv/1.17")
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/[>=4.6.0 <5]")
-        self.requires("libjpeg/[>=9e]")
+        self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         self.requires("openjpeg/[>=2.5.2 <3]")
         # zlib is always requires.
         # ENABLE_ZLIB_UNCOMPRESS just enables extra code
@@ -195,7 +195,7 @@ class PopplerConan(ConanFile):
         self.cpp_info.components["libpoppler"].requires = [
             "freetype::freetype",
             "zlib::zlib",
-            "libjpeg::libjpeg",
+            "libjpeg-turbo::jpeg",
             "openjpeg::openjpeg",
             "libpng::libpng",
             "libtiff::libtiff",

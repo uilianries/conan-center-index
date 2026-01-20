@@ -73,7 +73,7 @@ class Librasterlite2Conan(ConanFile):
         self.requires("giflib/5.2.1")
         self.requires("libcurl/8.1.2")
         self.requires("libgeotiff/1.7.1")
-        self.requires("libjpeg/9e")
+        self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         self.requires("libpng/1.6.40")
         self.requires("libspatialite/5.0.1")
         self.requires("libtiff/4.5.1")

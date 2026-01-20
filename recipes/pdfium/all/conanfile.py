@@ -23,12 +23,10 @@ class PdfiumConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_libjpeg": ["libjpeg", "libjpeg-turbo"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_libjpeg": "libjpeg",
     }
 
     def export_sources(self):
@@ -51,10 +49,7 @@ class PdfiumConan(ConanFile):
         self.requires("lcms/2.16")
         self.requires("openjpeg/2.5.0")
         self.requires("zlib/[>=1.2.11 <2]")
-        if self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/9e")
-        elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.1")
+        self.requires("libjpeg-turbo/[>=3.0.2 <4]")
 
     def validate(self):
         check_min_cppstd(self, 14)
@@ -77,7 +72,7 @@ class PdfiumConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["PDFIUM_ROOT"] = self.source_folder.replace("\\", "/")
-        tc.variables["PDF_LIBJPEG_TURBO"] = self.options.with_libjpeg == "libjpeg-turbo"
+        tc.variables["PDF_LIBJPEG_TURBO"] = True
         tc.variables["PDF_ENABLE_XFA"] = False  # TODO: pdfium-cmake needs updating
         tc.variables["PDF_ENABLE_V8"] = False  # TODO: requires v8
         tc.generate()

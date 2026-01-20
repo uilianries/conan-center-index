@@ -32,7 +32,7 @@ class NcbiCxxToolkit(ConanFile):
         "BZ2":          "bzip2/1.0.8",
         "CASSANDRA":    "cassandra-cpp-driver/2.15.3",
         "GIF":          "giflib/5.2.1",
-        "JPEG":         "libjpeg/9d",
+        "JPEG":         "libjpeg-turbo/[>=3.0.2 <4]",
         "LMDB":         "lmdb/0.9.29",
         "LZO":          "lzo/2.10",
         "MySQL":        "libmysqlclient/8.0.25",

@@ -24,7 +24,6 @@ class wxWidgetsConan(ConanFile):
     package_type = "library"
     options = {"shared": [True, False],
                "fPIC": [True, False],
-               "jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"],
                "secretstore": [True, False],
                "aui": [True, False],
                "opengl": [True, False],
@@ -50,7 +49,6 @@ class wxWidgetsConan(ConanFile):
     default_options = {
                "shared": False,
                "fPIC": True,
-               "jpeg": "libjpeg",
                "secretstore": True,
                "aui": True,
                "opengl": True,
@@ -142,13 +140,7 @@ class wxWidgetsConan(ConanFile):
                 self.requires("gst-plugins-base/1.19.2")
             self.requires("libcurl/[>=7.78.0 <9]")
 
-        if self.options.jpeg == "libjpeg":
-            self.requires("libjpeg/[>=9e]")
-        elif self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
-        elif self.options.jpeg == "mozjpeg":
-            self.requires("mozjpeg/[>=4.1.5 <5]")
-
+        self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/4.6.0")
         self.requires("zlib/[>=1.2.11 <2]")

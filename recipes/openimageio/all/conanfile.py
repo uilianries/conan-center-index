@@ -27,7 +27,7 @@ class OpenImageIOConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_libjpeg": ["libjpeg", "libjpeg-turbo"],
+        "with_libjpeg": [True, False],
         "with_libjxl": [True, False],
         "with_libpng": [True, False],
         "with_freetype": [True, False],
@@ -49,7 +49,7 @@ class OpenImageIOConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_libjpeg": "libjpeg",
+        "with_libjpeg": True,
         "with_libjxl": True,
         "with_libpng": True,
         "with_freetype": True,
@@ -95,9 +95,7 @@ class OpenImageIOConan(ConanFile):
         self.requires("libtiff/[>=4.6.0 <5]")
         self.requires("imath/[>3.1.9 <4]", transitive_headers=True)
         self.requires("openexr/[>=3.2.3 <4]")
-        if self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/[>=9f]")
-        elif self.options.with_libjpeg == "libjpeg-turbo":
+        if self.options.with_libjpeg:
             self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         if self.options.get_safe("with_libjxl"):
             self.requires("libjxl/0.11.1")
@@ -333,12 +331,8 @@ class OpenImageIOConan(ConanFile):
             "openexr::openexr",
         ]
 
-        if self.options.with_libjpeg == "libjpeg":
-            open_image_io.requires.append("libjpeg::libjpeg")
-        elif self.options.with_libjpeg == "libjpeg-turbo":
-            open_image_io.requires.append(
-                "libjpeg-turbo::libjpeg-turbo"
-            )
+        if self.options.with_libjpeg:
+            open_image_io.requires.append("libjpeg-turbo::libjpeg-turbo")
         if self.options.with_libpng:
             open_image_io.requires.append("libpng::libpng")
         if self.options.with_freetype:

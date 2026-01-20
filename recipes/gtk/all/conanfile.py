@@ -117,7 +117,7 @@ class GtkConan(ConanFile):
             self.requires("fribidi/1.0.12")
             self.requires("libpng/1.6.37")
             self.requires("libtiff/4.3.0")
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         if self.settings.os == "Linux":
             if self._gtk4:
                 self.requires("xkbcommon/1.4.1")
