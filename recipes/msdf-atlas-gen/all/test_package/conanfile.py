@@ -6,7 +6,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv", "VirtualBuildEnv"
 
     def layout(self):
         cmake_layout(self)
@@ -21,6 +21,6 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            self.run("msdf-atlas-gen -help", env="conanrun")
+            self.run("msdf-atlas-gen", env="conanrun")
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")

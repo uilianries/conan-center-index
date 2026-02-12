@@ -50,6 +50,7 @@ class MsdfAtlasGenConan(ConanFile):
         tc.cache_variables["MSDF_ATLAS_MSDFGEN_EXTERNAL"] = True
         tc.cache_variables["MSDF_ATLAS_INSTALL"] = True
         tc.cache_variables["MSDF_ATLAS_DYNAMIC_RUNTIME"] = not is_msvc_static_runtime(self)
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.preprocessor_definitions["MSDFGEN_USE_LIBPNG"] = 1
         tc.generate()
         tc = CMakeDeps(self)
@@ -70,9 +71,12 @@ class MsdfAtlasGenConan(ConanFile):
         self.cpp_info.components["msdf-atlas-gen"].set_property("cmake_target_name", "msdf-atlas-gen::msdf-atlas-gen")
         self.cpp_info.components["msdf-atlas-gen"].libs = ["msdf-atlas-gen"]
         self.cpp_info.components["msdf-atlas-gen"].defines.append("MSDF_ATLAS_STANDALONE")
-        self.cpp_info.components["msdf-atlas-gen"].requires = ["msdfgen::msdfgen", "artery-font-format::artery-font-format", "libpng::libpng"]
+        self.cpp_info.components["msdf-atlas-gen"].requires = ["msdfgen::msdfgen",
+                                                               "artery-font-format::artery-font-format",
+                                                               "libpng::libpng"]
         if is_msvc(self):
-            self.cpp_info.components["msdf-atlas-gen"].defines.append("MSDF_ATLAS_PUBLIC=__declspec(dllimport)" if self.options.shared else "MSDF_ATLAS_PUBLIC=")
+            self.cpp_info.components["msdf-atlas-gen"].defines.append("MSDF_ATLAS_PUBLIC=__declspec(dllimport)"
+                                                                        if self.options.shared else "MSDF_ATLAS_PUBLIC=")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["msdf-atlas-gen"].system_libs = ["pthread"]
 
@@ -80,3 +84,6 @@ class MsdfAtlasGenConan(ConanFile):
         self.cpp_info.components["msdf-atlas-gen-run"].set_property("cmake_target_aliases", ["msdf-atlas-gen-standalone::msdf-atlas-gen-standalone"])
         self.cpp_info.components["msdf-atlas-gen-run"].exe = "msdf-atlas-gen"
         self.cpp_info.components["msdf-atlas-gen-run"].location = os.path.join("bin", "msdf-atlas-gen")
+        self.cpp_info.components["msdf-atlas-gen-run"].requires = ["msdf-atlas-gen", "msdfgen::msdfgen",
+                                                                  "artery-font-format::artery-font-format",
+                                                                  "libpng::libpng"]
