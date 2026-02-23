@@ -88,38 +88,21 @@ class wxWidgetsConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-    @property
-    def _gtk_version(self):
-        if self.settings.os == "Linux":
-            return f"gtk{self.dependencies['gtk'].options.version}"
-
     def system_requirements(self):
         apt = package_manager.Apt(self)
         packages = []
-        if self.options.get_safe("secretstore"):
-            # TODO: Move to Conan libsecret package after using GTK from Conan
-            # libsecret and GTK need glib, which mixes with system deps from GTK
-            packages.append("libsecret-1-dev")
         if self.options.webview:
-            if self._gtk_version == "gtk2":
-                packages.extend(["libsoup2.4-dev",
-                                 "libwebkitgtk-dev"])
-            else:
-                packages.extend(["libsoup3.0-dev",
-                                 "libwebkit2gtk-4.0-dev"])
+            packages.extend(["libsoup3.0-dev",
+                                "libwebkit2gtk-4.0-dev"])
         if self.options.get_safe("cairo"):
             packages.append("libcairo2-dev")
         apt.install(packages)
 
         yum = package_manager.Yum(self)
         packages = []
-        if self.options.get_safe("secretstore"):
-            packages.append("libsecret-devel")
         if self.options.webview:
             packages.extend(["libsoup3-devel",
                              "webkit2gtk4.1-devel"])
-        if self.options.get_safe("cairo"):
-            packages.append("cairo-devel")
         yum.install(packages)
 
     def build_requirements(self):
@@ -130,10 +113,12 @@ class wxWidgetsConan(ConanFile):
     def requirements(self):
         if self.settings.os == "Linux":
             self.requires("xorg/system")
-            self.requires("gtk/system")
+            if self.options.get_safe("cairo"):
+                self.requires("cairo/[>=1.17.4 <2]")
+            self.requires("gtk/3.24.51")
             if self.options.get_safe("opengl", default=False):
                 self.requires("opengl/system")
-            self.requires("xkbcommon/1.6.0", options={"with_x11": True})
+            self.requires("xkbcommon/[>=1.6.0 <2]", options={"with_x11": True})
             # FIXME: Conan Cairo result in linkage errors due mixed system deps from GTK
             # if self.options.get_safe("cairo"):
             #    self.requires("cairo/1.18.0")
@@ -142,6 +127,8 @@ class wxWidgetsConan(ConanFile):
                 self.requires("gst-plugins-base/1.19.2")
             self.requires("libcurl/[>=7.78.0 <9]")
 
+        if self.options.get_safe("secretstore"):
+            self.requires("libsecret/0.21.7")
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/[>=9e]")
         elif self.options.jpeg == "libjpeg-turbo":
@@ -186,7 +173,7 @@ class wxWidgetsConan(ConanFile):
             tc.variables["wxBUILD_USE_STATIC_RUNTIME"] = "MT" in str(self.settings.compiler.runtime)
             tc.variables["wxBUILD_MSVC_MULTIPROC"] = True
         if self.settings.os == "Linux":
-            tc.variables["wxBUILD_TOOLKIT"] = self._gtk_version
+            tc.variables["wxBUILD_TOOLKIT"] = "gtk3"
             tc.variables["wxUSE_CAIRO"] = self.options.cairo
         # Disable some optional libraries that will otherwise lead to non-deterministic builds
         if self.settings.os != "Windows":
@@ -247,6 +234,10 @@ class wxWidgetsConan(ConanFile):
         deps.set_property("expat", "cmake_target_name", "EXPAT")
         deps.set_property("nanosvg", "cmake_file_name", "NanoSVG")
         deps.set_property("nanosvg", "cmake_target_name", "NanoSVG::nanosvg")
+        if self.settings.os == "Linux":
+            deps.set_property("gtk", "cmake_file_name", "GTK3")
+        if self.options.get_safe("secretstore"):
+            deps.set_property("libsecret", "cmake_file_name", "LIBSECRET")
         deps.generate()
 
     def _patch_sources(self):
@@ -327,7 +318,7 @@ class wxWidgetsConan(ConanFile):
 
         if self.settings.os == "Linux":
             prefix = "wx_"
-            toolkit = self._gtk_version
+            toolkit = "gtk3"
             version = ""
             suffix = version_suffix_major_minor
         elif self.settings.os == "Macos":
