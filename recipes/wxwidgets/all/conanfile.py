@@ -187,7 +187,7 @@ class wxWidgetsConan(ConanFile):
         tc.cache_variables["wxUSE_NANOSVG"] = "sys"
 
         # wxWidgets features
-        tc.cache_variables["wxUSE_SECRETSTORE"] = "ON" if self.options.get_safe("secretstore") else "OFF"
+        tc.cache_variables["wxUSE_SECRETSTORE"] = self.options.get_safe("secretstore", False)
 
         # wxWidgets libraries
         tc.cache_variables["wxUSE_AUI"] = self.options.aui
