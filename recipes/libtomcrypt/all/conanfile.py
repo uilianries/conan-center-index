@@ -54,29 +54,50 @@ class LibtomcryptConan(ConanFile):
         """ Helper method to construct the arguments for the make command based on the build options and settings.
             Environment variables have no effect because those variables are listed in the makefiles as arguments, so we need to pass them explicitly.
         """
-        args = ["PREFIX=", f"DESTDIR={self.package_folder}",]
+        args = ["PREFIX=", f"DESTDIR={self.package_folder}"]
+
         compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
         autotools_vars = AutotoolsToolchain(self).vars()
         autotoolsdeps_vars = AutotoolsDeps(self).vars()
+
         cc = compilers_from_conf.get("c", autotools_vars.get("CC", "cc"))
         if cc:
-            args.append(f'CC={cc}')
-        cflags = self.conf.get("tools.build:cflags", default=[], check_type=list) or autotools_vars.get("CFLAGS")
-        cppflags = self.conf.get("tools.build:cxxflags", default=[], check_type=list) or autotoolsdeps_vars.get("CPPFLAGS")
-        if cppflags:
-            cflags = f"{cflags} {cppflags}" if cflags else cppflags
-        if cflags:
-            args.append(f'CFLAGS={cflags}')
-        ldflags = self.conf.get("tools.build:sharedlinkflags", default=[], check_type=list) or autotoolsdeps_vars.get("LDFLAGS")
-        if ldflags:
-            args.append(f'LDFLAGS={ldflags}')
+            args.append(f"CC={cc}")
+
+        defs = self.conf.get("tools.build:defines", default=[], check_type=list)
+        defs.extend(["USE_LTM", "LTM_DESC"])
+
+        cflags = self.conf.get("tools.build:cflags", default=[], check_type=list)
+        cppflags = self.conf.get("tools.build:cxxflags", default=[], check_type=list)
+
+        # Combine cflags and cppflags, prioritizing autotools_vars and autotoolsdeps_vars if conf is empty
+        cflags_str = " ".join(cflags) if cflags else autotools_vars.get("CFLAGS", "")
+        cppflags_str = " ".join(cppflags) if cppflags else autotoolsdeps_vars.get("CPPFLAGS", "")
+
+        if defs:
+            cppflags_str = f"{cppflags_str} {' '.join(f'-D{d}' for d in defs)}".strip()
+
+        if cppflags_str:
+            cflags_str = f"{cflags_str} {cppflags_str}".strip()
+
+        if cflags_str:
+            args.append(f"CFLAGS={cflags_str}")
+
+        ldflags = self.conf.get("tools.build:sharedlinkflags", default=[], check_type=list)
+        ldflags_str = " ".join(ldflags) if ldflags else autotoolsdeps_vars.get("LDFLAGS", "")
+        if ldflags_str:
+            args.append(f"LDFLAGS={ldflags_str}")
+
         args.append(f"EXTRALIBS={autotoolsdeps_vars.get('LIBS', '')}")
+
         ar = autotools_vars.get("AR")
         if ar:
-            args.append(f'AR={ar}')
+            args.append(f"AR={ar}")
+
         ld = autotools_vars.get("LD")
         if ld:
-            args.append(f'LD={ld}')
+            args.append(f"LD={ld}")
+
         return args
 
     def build(self):
