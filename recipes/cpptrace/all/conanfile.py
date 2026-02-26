@@ -1,11 +1,13 @@
 from conan import ConanFile
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import get, copy, rmdir, replace_in_file
+from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, export_conandata_patches
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=1.53.0"
 
 class CpptraceConan(ConanFile):
     name = "cpptrace"
@@ -43,7 +45,10 @@ class CpptraceConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libdwarf/[>=0.11.0 <3]")
+        if Version(self.version) >= "0.4.0":
+            self.requires("libdwarf/0.9.1")
+        else:
+            self.requires("libdwarf/0.8.0")
         if self.options.unwind == "libunwind":
             self.requires("libunwind/1.8.0", transitive_libs=True)
 
@@ -54,26 +59,29 @@ class CpptraceConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
 
-    def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "Autoconfig.cmake"),
-                        "set(CMAKE_CXX_STANDARD 11)", "")
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        tc.variables["CPPTRACE_USE_EXTERNAL_LIBDWARF"] = True
-        tc.variables["CPPTRACE_CONAN"] = True
+        if Version(self.version) >= "0.3.0":
+            tc.variables["CPPTRACE_USE_EXTERNAL_LIBDWARF"] = True
+            tc.variables["CPPTRACE_CONAN"] = True
+        else:
+            if not self.options.shared:
+                tc.variables["CPPTRACE_STATIC"] = True
+            tc.variables["CPPTRACE_USE_SYSTEM_LIBDWARF"] = True
         if self.options.unwind == "libunwind":
             tc.variables["CPPTRACE_UNWIND_WITH_LIBUNWIND"] = True
-        tc.cache_variables["CPPTRACE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -86,7 +94,12 @@ class CpptraceConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
 
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = ["cpptrace"]
@@ -103,3 +116,9 @@ class CpptraceConan(ConanFile):
 
         if not self.options.shared:
             self.cpp_info.defines.append("CPPTRACE_STATIC_DEFINE")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "CPPTRACE"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "cpptrace"
+        self.cpp_info.names["cmake_find_package"] = "CPPTRACE"
+        self.cpp_info.names["cmake_find_package_multi"] = "cpptrace"

@@ -1,5 +1,4 @@
 #include <iostream>
-#include "libheif/heif_cxx.h"
 #include "libheif/heif.h"
 
 int main() {

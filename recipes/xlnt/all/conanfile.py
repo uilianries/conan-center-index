@@ -1,13 +1,12 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
-from conan.tools.apple import fix_apple_shared_install_name
 import os
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=1.53.0"
 
 
 class XlntConan(ConanFile):
@@ -15,7 +14,7 @@ class XlntConan(ConanFile):
     description = "Cross-platform user-friendly xlsx library for C++11+"
     license = "MIT"
     topics = ("excel", "xlsx", "spreadsheet", "reader", "writer")
-    homepage = "https://github.com/xlnt-community/xlnt"
+    homepage = "https://github.com/tfussell/xlnt"
     url = "https://github.com/conan-io/conan-center-index"
 
     package_type = "library"
@@ -47,9 +46,6 @@ class XlntConan(ConanFile):
         self.requires("libstudxml/1.1.0-b.10+1")
         self.requires("miniz/3.0.2")
         self.requires("utfcpp/3.2.3")
-        if Version(self.version) >= "1.6.1":  
-            self.requires("fast_float/8.1.0")  
-            self.requires("fmt/12.1.0")  
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -69,8 +65,6 @@ class XlntConan(ConanFile):
         tc.variables["SAMPLES"] = False
         tc.variables["BENCHMARKS"] = False
         tc.variables["PYTHON"] = False
-        if Version(self.version) < "1.6.1":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -94,8 +88,6 @@ class XlntConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        if Version(self.version) >= "1.6.1":
-            fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Xlnt")
@@ -105,3 +97,9 @@ class XlntConan(ConanFile):
         self.cpp_info.libs = [f"xlnt{suffix}"]
         if not self.options.shared:
             self.cpp_info.defines.append("XLNT_STATIC")
+
+        # TODO: to remove in conan v2
+        self.cpp_info.filenames["cmake_find_package"] = "Xlnt"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Xlnt"
+        self.cpp_info.names["cmake_find_package"] = "xlnt"
+        self.cpp_info.names["cmake_find_package_multi"] = "xlnt"

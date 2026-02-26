@@ -3,9 +3,10 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, save, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 
 
-required_conan_version = ">=2.4.0"
+required_conan_version = ">=1.54.0"
 
 
 class SoxrConan(ConanFile):
@@ -16,8 +17,6 @@ class SoxrConan(ConanFile):
     license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "library"
-    languages = ["C"]
-    implements = ["auto_shared_fpic"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -34,6 +33,16 @@ class SoxrConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")

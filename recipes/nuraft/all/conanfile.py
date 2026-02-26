@@ -2,8 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.scm import Version
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 import os
 
 required_conan_version = ">=1.53.0"
@@ -40,10 +39,6 @@ class NuRaftConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def build_requirements(self):
-        if Version(self.version) >= 3:
-            self.tool_requires("cmake/[>=3.26]")
-
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
         if self.options.asio == "boost":
@@ -54,9 +49,8 @@ class NuRaftConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support Windows")
-        if Version(self.version) < 3:
-            if self.settings.os == "Macos" and self.options.shared:
-                raise ConanInvalidConfiguration(f"{self.ref} shared not supported for Macos")
+        if self.settings.os == "Macos" and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} shared not supported for Macos")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
@@ -65,10 +59,6 @@ class NuRaftConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) >= 3:
-            tc.cache_variables["WITH_CONAN"] = True
-            tc.cache_variables["BOOST_ASIO"] = self.options.asio == "boost"
-            tc.cache_variables["BUILD_EXAMPLES"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -83,22 +73,8 @@ class NuRaftConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        if self.options.shared:
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.lib", os.path.join(self.package_folder, "lib"))
-        else:
-            rm(self, "*.so", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = ["nuraft"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
-        if Version(self.version) >= 3:
-            self.cpp_info.set_property("cmake_file_name", "NuRaft")
-            if self.options.shared:
-                self.cpp_info.set_property("cmake_target_name", "NuRaft::shared_lib")
-            else:
-                self.cpp_info.set_property("cmake_target_name", "NuRaft::static_lib")

@@ -21,6 +21,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
-            self.run(bin_path, env="conanrun")
+            config_xml_name = os.path.join(self.source_folder, "log4cxx_config.xml")
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run("{} {}".format(bin_path, config_xml_name), env="conanrun")
 

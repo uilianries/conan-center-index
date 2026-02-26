@@ -2,16 +2,22 @@ import glob
 import os
 
 from conan import ConanFile
-from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
-from conan.tools.files import copy, get, rename
+from conan.tools.files import (
+    apply_conandata_patches,
+    copy,
+    export_conandata_patches,
+    get,
+    rename
+)
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=1.53.0"
 
 
 class GetTextConan(ConanFile):
@@ -48,6 +54,9 @@ class GetTextConan(ConanFile):
     def _gettext_folder(self):
         return "gettext-tools"
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
@@ -66,8 +75,12 @@ class GetTextConan(ConanFile):
     def requirements(self):
         self.requires("libiconv/1.17")
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        if self.settings_build.os == "Windows":
+        if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -98,11 +111,6 @@ class GetTextConan(ConanFile):
             "--disable-threads" if self.options.threads == "disabled" else ("--enable-threads=" + str(self.options.threads)),
             f"--with-libiconv-prefix={unix_path(self, self.dependencies['libiconv'].package_folder)}",
         ]
-
-        if is_apple_os(self) and Version(self.version) >= "0.26":
-            # not guessed properly when cross-building
-            tc.configure_args.append("gl_cv_func_access_slash_works=yes")
-
         if is_msvc(self) or self._is_clang_cl:
             target = None
             if self.settings.arch == "x86_64":
@@ -116,18 +124,6 @@ class GetTextConan(ConanFile):
             if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
                (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler.version) >= "180"):
                 tc.extra_cflags += ["-FS"]
-           
-            if cross_building(self) or self.settings.arch == "armv8":
-                # override guesses with known good values from a native build
-                tc.configure_args.extend([
-                    "gl_cv_func_frexpl_works=yes",
-                    "gl_cv_func_mbrtowc_empty_input=no",
-                    "gl_cv_func_snprintf_truncation_c99=yes",
-                    'gl_cv_func_printf_flag_zero=yes',
-                    'gl_cv_func_printf_precision=yes',
-                    'gl_cv_func_swprintf_works=yes',
-                    'gl_cv_func_swprintf_C_locale_sans_EILSEQ=yes',
-                ])
 
             if self.settings.build_type == "Debug":
                 # Skip checking for the 'n' printf format directly
@@ -198,6 +194,7 @@ class GetTextConan(ConanFile):
             deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.configure("gettext-runtime")
         autotools.make()
@@ -215,7 +212,6 @@ class GetTextConan(ConanFile):
         copy(self, "*libgnuintl.h", self.build_folder, dest_include_dir, keep_path=False)
         rename(self, os.path.join(dest_include_dir, "libgnuintl.h"), os.path.join(dest_include_dir, "libintl.h"))
         fix_msvc_libname(self)
-        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
@@ -224,6 +220,9 @@ class GetTextConan(ConanFile):
         self.cpp_info.libs = ["gnuintl"]
         if is_apple_os(self):
             self.cpp_info.frameworks.append("CoreFoundation")
+
+        self.cpp_info.names["cmake_find_package"] = "Intl"
+        self.cpp_info.names["cmake_find_package_multi"] = "Intl"
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""

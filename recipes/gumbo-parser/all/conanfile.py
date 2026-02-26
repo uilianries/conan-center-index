@@ -5,9 +5,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc, unix_path
 import os
 
 required_conan_version = ">=1.53.0"
@@ -15,11 +13,10 @@ required_conan_version = ">=1.53.0"
 
 class GumboParserConan(ConanFile):
     name = "gumbo-parser"
-    description = "HTML parser library implemented in C99"
+    description = "An HTML5 parsing library in pure C99"
     topics = ("parser", "html")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://codeberg.org/gumbo-parser/gumbo-parser"
-    package_type = "library"
+    homepage = "https://github.com/google/gumbo-parser"
     license = "Apache-2.0"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -31,6 +28,10 @@ class GumboParserConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -50,10 +51,11 @@ class GumboParserConan(ConanFile):
             raise ConanInvalidConfiguration("gumbo-parser recipe does not support Visual Studio yet")
 
     def build_requirements(self):
-        if Version(self.version) >= "0.13.2":
-            self.tool_requires("meson/[>=1.4.1]")
-        else:
-            self.tool_requires("libtool/2.4.7")
+        self.tool_requires("libtool/2.4.7")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -62,36 +64,22 @@ class GumboParserConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if Version(self.version) >= "0.13.2":
-            tc = MesonToolchain(self)
-            tc.project_options["tests"] = False
-            tc.generate()
-        else:
-            tc = AutotoolsToolchain(self)
-            tc.generate()
+        tc = AutotoolsToolchain(self)
+        tc.generate()
 
     def build(self):
-        if Version(self.version) >= "0.13.2":
-            meson = Meson(self)
-            meson.configure()
-            meson.build()
-        else:
-            autotools = Autotools(self)
-            autotools.autoreconf()
-            autotools.configure()
-            autotools.make()
+        autotools = Autotools(self)
+        autotools.autoreconf()
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        if Version(self.version) >= "0.13.2":
-            meson = Meson(self)
-            meson.install()
-            copy(self, "COPYING", src=os.path.join(self.source_folder, "doc"), dst=os.path.join(self.package_folder, "licenses"))
-        else:
-            autotools = Autotools(self)
-            autotools.install()
-            copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
+        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):

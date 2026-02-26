@@ -38,10 +38,7 @@ class CppYyjsonConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) < "0.6.0":
-            self.requires("yyjson/0.9.0")
-        else:
-            self.requires("yyjson/0.10.0")
+        self.requires("yyjson/0.9.0")
         self.requires("fmt/10.2.1")
         self.requires("nameof/0.10.4")
 

@@ -6,10 +6,9 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
+
 
 class ShadercConan(ConanFile):
     name = "shaderc"
@@ -46,7 +45,12 @@ class ShadercConan(ConanFile):
 
     @property
     def _spirv_version(self):
-        return self.conan_data.get("siprv_mapping")[self.version]
+        return {
+            # TODO: bump me once newer versions are available on CCI
+            # "2023.6": "1.3.261.1",
+            "2023.6": "1.3.239.0",
+            "2021.1": "1.3.224.0",
+        }[str(self.version)]
 
     def requirements(self):
         # transitive_headers=True is not required for any of the dependencies
@@ -85,9 +89,8 @@ class ShadercConan(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("glslang::glslang-core", "cmake_target_name", "glslang")
         deps.set_property("glslang::osdependent", "cmake_target_name", "OSDependent")
-        if Version(self.version) < Version("2023.8"):  # The change was made here :https://github.com/google/shaderc/commit/40bced4e1e205ecf44630d2dfa357655b6dabd04
-            deps.set_property("glslang::oglcompiler", "cmake_target_name", "OGLCompiler")
-            deps.set_property("glslang::hlsl", "cmake_target_name", "HLSL")
+        deps.set_property("glslang::oglcompiler", "cmake_target_name", "OGLCompiler")
+        deps.set_property("glslang::hlsl", "cmake_target_name", "HLSL")
         deps.set_property("glslang::spirv", "cmake_target_name", "SPIRV")
         deps.generate()
 
@@ -101,7 +104,6 @@ class ShadercConan(ConanFile):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        fix_apple_shared_install_name(self)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
@@ -121,7 +123,8 @@ class ShadercConan(ConanFile):
         self.cpp_info.requires = [
             "glslang::glslang-core",
             "glslang::osdependent",
-            *(["glslang::oglcompiler", "glslang::hlsl"] if Version(self.version) < Version("2023.8") else []),
+            "glslang::oglcompiler",
+            "glslang::hlsl",
             "glslang::spirv",
             "spirv-tools::spirv-tools-core",
             "spirv-tools::spirv-tools-opt",

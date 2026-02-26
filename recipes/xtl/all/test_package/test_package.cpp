@@ -1,14 +1,15 @@
 #include <iostream>
-#include <xtl/xoptional.hpp>
+#include <xtl/xvariant.hpp>
 
 int main(int argc, char *argv[]) {
-  xtl::xoptional<int, bool> v, w;
+  xtl::variant<int, float> v, w;
 
-  w = v.value_or(0);
   v = 12;
+  int i = xtl::get<int>(v);
+  w = xtl::get<int>(v);
 
-  std::cout << v.value() << "\n";
-  std::cout << w.value() << "\n";
+  std::cout << xtl::get<int>(v) << "\n";
+  std::cout << xtl::get<int>(w) << "\n";
 
   return 0;
 }

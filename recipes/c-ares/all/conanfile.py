@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import collect_libs, copy, get, rm, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -9,24 +10,23 @@ required_conan_version = ">=1.53.0"
 
 class CAresConan(ConanFile):
     name = "c-ares"
-    description = "A C library for asynchronous DNS requests"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://c-ares.haxx.se/"
+    description = "A C library for asynchronous DNS requests"
     topics = ("dns", "resolver", "async")
+    homepage = "https://c-ares.haxx.se/"
+
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "tools": [True, False],
-        "multithreading": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "tools": True,
-        "multithreading": True,
     }
 
     def config_options(self):
@@ -52,7 +52,6 @@ class CAresConan(ConanFile):
         tc.variables["CARES_BUILD_TESTS"] = False
         tc.variables["CARES_MSVC_STATIC_RUNTIME"] = False
         tc.variables["CARES_BUILD_TOOLS"] = self.options.tools
-        tc.variables["CARES_THREADS"] = self.options.multithreading
         tc.generate()
 
     def build(self):
@@ -80,12 +79,21 @@ class CAresConan(ConanFile):
             self.cpp_info.components["cares"].defines.append("CARES_STATICLIB")
         if self.settings.os == "Linux":
             self.cpp_info.components["cares"].system_libs.append("rt")
-            self.cpp_info.components["cares"].system_libs.append("pthread")
+            if Version(self.version) >= "1.23.0":
+                self.cpp_info.components["cares"].system_libs.append("pthread")
         elif self.settings.os == "Windows":
             self.cpp_info.components["cares"].system_libs.extend(["ws2_32", "advapi32"])
-            self.cpp_info.components["cares"].system_libs.append("iphlpapi")
+            if Version(self.version) >= "1.18.0":
+                self.cpp_info.components["cares"].system_libs.append("iphlpapi")
         elif is_apple_os(self):
             self.cpp_info.components["cares"].system_libs.append("resolv")
 
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.names["pkg_config"] = "libcares"
+        self.cpp_info.components["cares"].names["cmake_find_package"] = "cares"
+        self.cpp_info.components["cares"].names["cmake_find_package_multi"] = "cares"
+        self.cpp_info.components["cares"].names["pkg_config"] = "libcares"
         self.cpp_info.components["cares"].set_property("cmake_target_name", "c-ares::cares")
         self.cpp_info.components["cares"].set_property("pkg_config_name", "libcares")
+        if self.options.tools:
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

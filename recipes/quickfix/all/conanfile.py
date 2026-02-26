@@ -54,10 +54,10 @@ class QuickfixConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
 
         if self.options.with_postgres:
-            self.requires("libpq/[>=15.3 <18]")
+            self.requires("libpq/15.3")
 
         if self.options.with_mysql == "libmysqlclient":
-            self.requires("libmysqlclient/8.1.0")
+            self.requires("libmysqlclient/8.0.31")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
@@ -67,7 +67,7 @@ class QuickfixConan(ConanFile):
             raise ConanInvalidConfiguration("QuickFIX doesn't support ARM compilation")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16]")
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

@@ -1,4 +1,6 @@
-#include "xtensor.hpp"
+#include "xtensor/xarray.hpp"
+#include "xtensor/xio.hpp"
+#include "xtensor/xview.hpp"
 #include <iostream>
 
 int main(int argc, char *argv[]) {

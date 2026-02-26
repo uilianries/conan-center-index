@@ -7,4 +7,3 @@
 *.txt text eol=lf
 *.yml text eol=lf
 *.am text eol=lf
-*.in text eol=lf

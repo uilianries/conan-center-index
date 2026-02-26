@@ -11,11 +11,11 @@ required_conan_version = ">=1.53.0"
 
 class LibxlsxwriterConan(ConanFile):
     name = "libxlsxwriter"
-    description = "A C library for creating Excel XLSX files"
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jmcnamara/libxlsxwriter"
     topics = ("excel", "xlsx")
+    description = "A C library for creating Excel XLSX files"
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -64,12 +64,9 @@ class LibxlsxwriterConan(ConanFile):
         if Version(self.version) < "1.0.6" and self.info.options.md5 == "openssl":
             raise ConanInvalidConfiguration(f"{self.name}:md5=openssl is not suppported in {self.ref}")
 
-    def build_requirements(self):
-        if Version(self.version) >= "1.2.1":
-            self.tool_requires("cmake/[>=3.16 <4]")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -86,8 +83,6 @@ class LibxlsxwriterConan(ConanFile):
             tc.variables["USE_STATIC_MSVC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.generate()
         deps = CMakeDeps(self)
-        if Version(self.version) >= "1.1.9":
-            deps.set_property("minizip", "cmake_additional_variables_prefixes", ["MINIZIP"])
         deps.generate()
 
     def build(self):

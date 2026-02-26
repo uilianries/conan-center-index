@@ -15,7 +15,6 @@ class TzConan(ConanFile):
     description = "The Time Zone Database contains data that represent the history of local time for many representative locations around the globe."
     topics = ("tz", "tzdb", "time", "zone", "date")
     settings = "os", "build_type", "arch", "compiler"
-    deprecated = True
 
     @property
     def _settings_build(self):

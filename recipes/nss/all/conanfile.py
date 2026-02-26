@@ -1,18 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import msvc_runtime_flag, VCVars, is_msvc
+from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import get, chdir, rename, rm, copy, replace_in_file, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import apply_conandata_patches, get, chdir, rename, rm
 from conan.tools.build import cross_building
-from conan.tools.layout import basic_layout
-from conan.tools.apple import fix_apple_shared_install_name
+from conans import tools
 import os
 import glob
 
-
-required_conan_version = ">=2.0.9"
-
+required_conan_version = ">=1.51.3"
 
 class NSSConan(ConanFile):
     name = "nss"
@@ -20,55 +16,64 @@ class NSSConan(ConanFile):
     homepage = "https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Network Security Services"
-    package_type = "library"
     topics = ("network", "security", "crypto", "ssl")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    implements = ["auto_shared_fpic"]
+    default_options = {"shared": True, "fPIC": True}
+
 
     @property
-    def _make(self):
-        return self.conf.get("tools.gnu:make_program", check_type=str, default="make")
+    def _source_subfolder(self):
+        return "source_subfolder"
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def build_requirements(self):
-        if is_msvc(self) and not self.conf.get("tools.microsoft.bash:path"):
-            self.tool_requires("msys2/cci.latest")
+        if self.settings.compiler == "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
         if self.settings.os == "Windows":
-            self.tool_requires("mozilla-build/3.3")
-            self.tool_requires("sqlite3/<host_version>")
-        self.tool_requires("nspr/<host_version>")
+            self.build_requires("mozilla-build/3.3")
+        if hasattr(self, "settings_build"):
+            self.build_requires("sqlite3/3.41.2")
+
+    def configure(self):
+        self.options["nspr"].shared = True
+        self.options["sqlite3"].shared = True
+
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def requirements(self):
-        # INFO: Public header consumed by seccomon.h:17 #include "prtypes.h"
-        self.requires("nspr/4.35", transitive_headers=True)
-        self.requires("sqlite3/[>=3.41 <4]")
-        self.requires("zlib/[>=1.2.13 <2]")
+        self.requires("nspr/4.35")
+        self.requires("sqlite3/3.41.2")
+        self.requires("zlib/1.2.13")
 
     def validate(self):
         if not self.options.shared:
             raise ConanInvalidConfiguration("NSS recipe cannot yet build static library. Contributions are welcome.")
-        if not self.dependencies["nspr"].options.shared:
-            raise ConanInvalidConfiguration("NSS cannot link to static NSPR. Please use option nspr/*:shared=True")
-
+        if not self.options["nspr"].shared:
+            raise ConanInvalidConfiguration("NSS cannot link to static NSPR. Please use option nspr:shared=True")
         if msvc_runtime_flag(self) == "MTd":
             raise ConanInvalidConfiguration("NSS recipes does not support MTd runtime. Contributions are welcome.")
-    
-    def export_sources(self):
-        export_conandata_patches(self)
+        if not self.options["sqlite3"].shared:
+            raise ConanInvalidConfiguration("NSS cannot link to static sqlite. Please use option sqlite3:shared=True")
+        if self.settings.arch in ["armv8", "armv8.3"] and self.settings.os in ["Macos"]:
+            raise ConanInvalidConfiguration("Macos ARM64 builds not yet supported. Contributions are welcome.")
+        if Version(self.version) < "3.74":
+            if self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= 13:
+                raise ConanInvalidConfiguration("nss < 3.74 requires clang < 13 .")
+
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     @property
     def _make_args(self):
         args = []
-        # INFO: NSS has a dedicated Makefile for each target platform.
-        # Darwin/Makfile.mk differs from others how to handle compiler flags
         if self.settings.arch in ["x86_64"]:
             args.append("USE_64=1")
             if self.settings.os == "Macos":
@@ -80,9 +85,8 @@ class NSSConan(ConanFile):
             args.append("CPU_ARCH=aarch64")
         if self.settings.compiler == "gcc":
             args.append("XCFLAGS=-Wno-array-parameter")
-
-        args.append("NSPR_INCLUDE_DIR=%s" % self.dependencies["nspr"].cpp_info.aggregated_components().includedirs[1])
-        args.append("NSPR_LIB_DIR=%s" % self.dependencies["nspr"].cpp_info.aggregated_components().libdirs[0])
+        args.append("NSPR_INCLUDE_DIR=%s" % self.deps_cpp_info["nspr"].include_paths[1])
+        args.append("NSPR_LIB_DIR=%s" % self.deps_cpp_info["nspr"].lib_paths[0])
 
         os_map = {
             "Linux": "Linux",
@@ -95,34 +99,43 @@ class NSSConan(ConanFile):
         args.append("OS_ARCH=%s" % os_map.get(str(self.settings.os), "UNSUPPORTED_OS"))
         if self.settings.build_type != "Debug":
             args.append("BUILD_OPT=1")
-        if is_msvc(self):
+        if self.settings.compiler == "Visual Studio":
             args.append("NSPR31_LIB_PREFIX=$(NULL)")
 
         args.append("USE_SYSTEM_ZLIB=1")
-        args.append("ZLIB_INCLUDE_DIR=%s" % self.dependencies["zlib"].cpp_info.aggregated_components().includedirs[0])
+        args.append("ZLIB_INCLUDE_DIR=%s" % self.deps_cpp_info["zlib"].include_paths[0])
 
-        def adjust_path(path):
+
+        def adjust_path(path, settings):
             """
             adjusts path to be safely passed to the compiler command line
             for Windows bash, ensures path is in format according to the subsystem
             for path with spaces, places double quotes around it
             converts slashes to backslashes, or vice versa
             """
-            if is_msvc(self):
+            compiler = _base_compiler(settings)
+            if str(compiler) == 'Visual Studio':
                 path = path.replace('/', '\\')
             else:
                 path = path.replace('\\', '/')
             return '"%s"' % path if ' ' in path else path
 
-        def _format_library_paths(library_paths):
-            pattern = "-LIBPATH:%s" if is_msvc(self) else "-L%s"
-            return [pattern % adjust_path(library_path)
+        def _base_compiler(settings):
+            return settings.get_safe("compiler.base") or settings.get_safe("compiler")
+
+        def _format_library_paths(library_paths, settings):
+            compiler = _base_compiler(settings)
+            pattern = "-LIBPATH:%s" if str(compiler) == 'Visual Studio' else "-L%s"
+            return [pattern % adjust_path(library_path, settings)
                     for library_path in library_paths if library_path]
 
-        def _format_libraries(libraries):
+
+        def _format_libraries(libraries, settings):
             result = []
+            compiler = settings.get_safe("compiler")
+            compiler_base = settings.get_safe("compiler.base")
             for library in libraries:
-                if is_msvc(self):
+                if str(compiler) == 'Visual Studio' or str(compiler_base) == 'Visual Studio':
                     if not library.endswith(".lib"):
                         library += ".lib"
                     result.append(library)
@@ -130,86 +143,56 @@ class NSSConan(ConanFile):
                     result.append(f"-l{library}")
             return result
 
+
         args.append("\"ZLIB_LIBS=%s\"" % " ".join(
-            _format_libraries(self.dependencies["zlib"].cpp_info.aggregated_components().libs) +
-            _format_library_paths(self.dependencies["zlib"].cpp_info.aggregated_components().libdirs)))
+            _format_libraries(self.deps_cpp_info["zlib"].libs, self.settings) +
+            _format_library_paths(self.deps_cpp_info["zlib"].lib_paths, self.settings)))
         args.append("NSS_DISABLE_GTESTS=1")
         args.append("NSS_USE_SYSTEM_SQLITE=1")
-        args.append("SQLITE_INCLUDE_DIR=%s" % self.dependencies["sqlite3"].cpp_info.aggregated_components().includedirs[0])
-        args.append("SQLITE_LIB_DIR=%s" % self.dependencies["sqlite3"].cpp_info.aggregated_components().libdirs[0])
+        args.append("SQLITE_INCLUDE_DIR=%s" % self.deps_cpp_info["sqlite3"].include_paths[0])
+        args.append("SQLITE_LIB_DIR=%s" % self.deps_cpp_info["sqlite3"].lib_paths[0])
         args.append("NSDISTMODE=copy")
-        args.append("NSS_ENABLE_WERROR=0")
         if cross_building(self):
             args.append("CROSS_COMPILE=1")
-        # FIXME: Disable shlibsign on Mac M1 until fixed:
-        # shlibsign -v -i dist/lib/libsoftokn3.dylib
-        # loading softokn3 failedmake[4]: *** [dist/lib/libsoftokn3.chk] Error 1
-        elif self.settings.os == "Macos" and self.settings.arch == "armv8":
-            args.append("CROSS_COMPILE=1")
-        if self.conf.get("tools.compilation:verbosity", check_type=str, default="quiet") == "verbose":
-            args.append("V=1")
-        if self.settings.arch != "x86_64":
-            args.append("NSS_DISABLE_AVX2=1")
-        for folder in ["DIST", "SOURCE_PREFIX", "SOURCE_MD_DIR"]:
-            args.append(f"{folder}={self.build_folder}/dist")
+        return args
 
-        return  " ".join(args)
-
-    def generate(self):
-        ms = VCVars(self)
-        ms.generate()
-        vbe = VirtualBuildEnv(self)
-        vbe.generate()
-        if not cross_building(self):
-            vre = VirtualRunEnv(self)
-            vre.generate(scope="build")
-
-    def _patch_sources(self):
-        # INFO: The Darwin.mk has no configuration for ARM arch, and anything different from x86_64 or arm is considered as PowerPC
-        # Using arm as CPU_ARCH will require ARM neon support, resulting in build errors due missing __ARM_FEATURE_CRYPTO feature support in Clang
-        # See https://bugzilla.mozilla.org/show_bug.cgi?id=1952518
-        # 
-        replace_in_file(self, os.path.join(self.source_folder, "nss", "coreconf", "Darwin.mk"), "ifeq (arm,$(CPU_ARCH))", "ifeq (aarch64, $(CPU_ARCH))")
 
     def build(self):
-        # INFO: Patch is needed only for versions before 3.119
-        if (Version(self.version) < "3.119"):
-            self._patch_sources()
-        with chdir(self, os.path.join(self.source_folder, "nss")):
-            self.run(f"{self._make} {self._make_args}")
+        apply_conandata_patches(self)
+        with chdir(self, os.path.join(self._source_subfolder, "nss")):
+            with tools.vcvars(self) if self.settings.compiler == "Visual Studio" else tools.no_op():
+                self.run("make %s" % " ".join(self._make_args), run_environment=True)
 
     def package(self):
-        copy(self, "COPYING", src=os.path.join(self.source_folder, "nss"), dst=os.path.join(self.package_folder, "licenses"))
-
-        with chdir(self, os.path.join(self.source_folder, "nss")):
-            self.run(f"{self._make} install {self._make_args}")
-
-        copy(self, "*", src=os.path.join(self.build_folder, "dist", "public", "nss"), dst=os.path.join(self.package_folder, "include"))
-        for d in os.listdir(os.path.join(self.build_folder, "dist")):
-            if d in ["private", "public"]:
+        self.copy("COPYING", src = os.path.join(self._source_subfolder, "nss"), dst = "licenses")
+        with chdir(self, os.path.join(self._source_subfolder, "nss")):
+            self.run("make install %s" % " ".join(self._make_args))
+        self.copy("*",
+                  src=os.path.join(self._source_subfolder, "dist", "public", "nss"),
+                  dst="include")
+        for d in os.listdir(os.path.join(self._source_subfolder, "dist")):
+            if d in ["private","public"]:
                 continue
-            f = os.path.join(self.build_folder, "dist", d)
+            f = os.path.join(self._source_subfolder, "dist", d)
             if not os.path.isdir(f):
                 continue
-            copy(self, "*", src=f, dst=os.path.join(self.package_folder, os.path.basename(f)))
+            self.copy("*", src = f)
 
-        for dll_file in glob.glob(os.path.join(self.build_folder, "dist", "lib", "*.dll")):
+        for dll_file in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
             rename(self, dll_file, os.path.join(self.package_folder, "bin", os.path.basename(dll_file)))
 
-        # INFO: NSS builds both shared and static libraries at same time
         if self.options.shared:
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.dll", os.path.join(self.package_folder, "lib"))
         else:
             rm(self, "*.so", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
 
-        fix_apple_shared_install_name(self)
+
 
     def package_info(self):
+
         def _library_name(lib,vers):
             return f"{lib}{vers}" if self.options.shared else lib
-
         self.cpp_info.components["libnss"].libs.append(_library_name("nss", 3))
         self.cpp_info.components["libnss"].requires = ["nssutil", "nspr::nspr"]
 
@@ -221,7 +204,7 @@ class NSSConan(ConanFile):
         self.cpp_info.components["softokn"].libs = [_library_name("softokn", 3)]
         self.cpp_info.components["softokn"].requires = ["sqlite3::sqlite3", "nssutil", "nspr::nspr"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["softokn"].system_libs = ["pthread", "m"]
+            self.cpp_info.components["softokn"].system_libs = ["pthread"]
 
         self.cpp_info.components["nssdbm"].libs = [_library_name("nssdbm", 3)]
         self.cpp_info.components["nssdbm"].requires = ["nspr::nspr", "nssutil"]

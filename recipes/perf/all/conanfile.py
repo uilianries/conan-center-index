@@ -43,7 +43,6 @@ class Perf(ConanFile):
     def generate(self):
         tc = AutotoolsToolchain(self)
         tc.make_args += ["NO_LIBPYTHON=1"]
-        tc.make_args += ["WERROR=0"]
         tc.generate()
 
     def build(self):

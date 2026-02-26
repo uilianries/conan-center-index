@@ -7,7 +7,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=2.4"
+required_conan_version = ">=1.54.0"
 
 
 class YASMConan(ConanFile):
@@ -19,10 +19,17 @@ class YASMConan(ConanFile):
     topics = ("yasm", "installer", "assembler")
     license = "BSD-2-Clause"
     settings = "os", "arch", "compiler", "build_type"
-    languages = ["C"]
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         export_conandata_patches(self)
+
+    def configure(self):
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         if is_msvc(self):
@@ -34,7 +41,7 @@ class YASMConan(ConanFile):
         del self.info.settings.compiler
 
     def build_requirements(self):
-        if self.settings_build.os == "Windows" and not is_msvc(self):
+        if self._settings_build.os == "Windows" and not is_msvc(self):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -99,3 +106,7 @@ class YASMConan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
+        self.env_info.PATH.append(bin_path)

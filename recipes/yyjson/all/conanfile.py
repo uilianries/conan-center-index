@@ -30,6 +30,8 @@ class YyjsonConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "0.8.0":
+            del self.options.with_utf8_validation
 
     def configure(self):
         if self.options.shared:
@@ -45,7 +47,8 @@ class YyjsonConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["YYJSON_DISABLE_UTF8_VALIDATION"] = not bool(self.options.with_utf8_validation)
+        if Version(self.version) >= "0.8.0":
+            tc.variables["YYJSON_DISABLE_UTF8_VALIDATION"] = not bool(self.options.with_utf8_validation)
         tc.generate()
 
     def build(self):

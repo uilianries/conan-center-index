@@ -19,7 +19,6 @@ class PfrConan(ConanFile):
     license = "BSL-1.0"
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    deprecated = "boost"
 
     @property
     def _min_cppstd(self):
