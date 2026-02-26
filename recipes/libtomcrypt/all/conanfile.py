@@ -63,7 +63,7 @@ class LibtomcryptConan(ConanFile):
         """
         Helper method to determine the appropriate makefile based on the build options and settings.
         """
-        makefile = "makefile.shared" if self.options.shared else "makefile.unix"
+        makefile = "makefile.shared" if self.options.get_safe("shared") else "makefile.unix"
         if is_msvc(self):
             makefile = "makefile.msvc"
         elif self.settings.os == "Windows":
@@ -175,7 +175,7 @@ class LibtomcryptConan(ConanFile):
         # INFO: bin dir is empty by created during the install step
         rmdir(self, os.path.join(self.package_folder, "bin"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
