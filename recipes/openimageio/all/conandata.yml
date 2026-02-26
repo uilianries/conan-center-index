@@ -1,47 +1,12 @@
 sources:
-  "2.4.7.1":
-    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.4.7.1.tar.gz"
-    sha256: "a3dc6fdb3693eb5f1e22191e41c05800a4944f3c76daffe90bd203f956180126"
-  "2.4.17.0":
-    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.4.17.0.tar.gz"
-    sha256: "7fe81d8e5bce30cc4a212f020ac3cc4344e6b7c1c0842475e3a048515099c65c"
-  "2.5.6.0":
-    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.5.6.0.tar.gz"
-    sha256: "bcfced40a25ef8576383b44d8bbe3732aa2b8efc7b8614482783d6f90378d307"
-  "2.5.9.0":
-    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.5.9.0.tar.gz"
-    sha256: "b6a68e369bc475525eb843bdc0cb8adc910cc71000825f8db9b5e136166cdc78"
-  "2.5.10.1":
-    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.5.10.1.tar.gz"
-    sha256: "8f6a547f6a5d510737ba436f867043db537def65f0fdb14ec30e5a185b619f93"
-  "2.5.11.0":
-    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.5.11.0.tar.gz"
-    sha256: "ebf1945e36679be55519d9f42a8f029c4a53d4efb4aaee3b10af6cdc93fb614b"
+  "3.1.10.0":
+    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/releases/download/v3.1.10.0/OpenImageIO-3.1.10.0.tar.gz"
+    sha256: "370d3e178dd0634febdbd441cf04bcda38eac2e6cec57490af17a3e214993703"
+  "2.5.19.1":
+    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.5.19.1.tar.gz"
+    sha256: "adb73f270f2eaae81c3c7cde311239944ae9faf6d206552da4ee12d746628b26"
 patches:
-  "2.4.7.1":
-    - patch_file: "patches/2.4.7.1-cmake-targets.patch"
-      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
-      patch_type: "conan"
-    - patch_file: "patches/2.4.7.1-fix-msvc2017.patch"
-      patch_description: "Fix compile error with MSVC 2017"
-      patch_type: "official"
-  "2.4.17.0":
-    - patch_file: "patches/2.4.17.0-cmake-targets.patch"
-      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
-      patch_type: "conan"
-  "2.5.6.0":
-    - patch_file: "patches/2.5.6.0-cmake-targets.patch"
-      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
-      patch_type: "conan"
-  "2.5.9.0":
-    - patch_file: "patches/2.5.9.0-cmake-targets.patch"
-      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
-      patch_type: "conan"
-  "2.5.10.1":
-    - patch_file: "patches/2.5.10.1-cmake-targets.patch"
-      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
-      patch_type: "conan"
-  "2.5.11.0":
-    - patch_file: "patches/2.5.10.1-cmake-targets.patch"
-      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
-      patch_type: "conan"
+  "3.1.10.0":
+    - patch_file: "patches/3.1.10.0-conan-fixes.patch"
+  "2.5.19.1":
+    - patch_file: "patches/2.5.19.1-conan-fixes.patch"

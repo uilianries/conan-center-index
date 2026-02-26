@@ -14,6 +14,7 @@ class CrowConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://crowcpp.org/"
     topics = ("web", "microframework", "header-only")
+    package_type = "header-library"
     settings = "os", "compiler", "arch", "build_type"
     options = {
         "amalgamation": [True, False],
@@ -28,6 +29,8 @@ class CrowConan(ConanFile):
 
     @property
     def _min_cppstd(self):
+        if Version(self.version) >= "1.2.1":
+            return 17
         return 11
 
     def configure(self):
@@ -116,6 +119,8 @@ class CrowConan(ConanFile):
 
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["wsock32", "ws2_32"]
 
         self.cpp_info.set_property("cmake_file_name", "Crow")
         self.cpp_info.set_property("cmake_target_name", "Crow::Crow")

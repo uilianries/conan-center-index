@@ -15,7 +15,7 @@ class EnchantConan(ConanFile):
     )
     license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://abiword.github.io/enchant/"
+    homepage = "https://rrthomas.github.io/enchant/"
     topics = ("enchant", "spell", "spell-check")
 
     package_type = "shared-library"
@@ -31,7 +31,7 @@ class EnchantConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.78.1")
+        self.requires("glib/[^2.78]")
         self.requires("hunspell/1.7.2")
 
     def source(self):

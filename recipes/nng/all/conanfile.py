@@ -28,6 +28,7 @@ class NngConan(ConanFile):
         "max_poller_threads": ["ANY"],
         "compat": [True, False],
         "with_ipv6": [True, False],
+        "tls_engine": ["mbed", "wolf"],
     }
     default_options = {
         "shared": False,
@@ -40,6 +41,7 @@ class NngConan(ConanFile):
         "max_poller_threads": "8",
         "compat": True,
         "with_ipv6": True,
+        "tls_engine": "mbed",
     }
 
     def export_sources(self):
@@ -56,6 +58,8 @@ class NngConan(ConanFile):
             del self.options.compat
         if Version(self.version) < "1.7.3":
             del self.options.with_ipv6
+        if Version(self.version) < "1.9.0":
+            del self.options.tls_engine
 
     def configure(self):
         if self.options.shared:
@@ -68,10 +72,14 @@ class NngConan(ConanFile):
 
     def requirements(self):
         if self.options.tls:
-            if Version(self.version) < "1.5.2":
-                self.requires("mbedtls/2.25.0")
-            else:
-                self.requires("mbedtls/3.5.2")
+            tls_engine = self.options.get_safe("tls_engine", "mbed")
+            if tls_engine == "mbed":
+                if Version(self.version) < "1.5.2":
+                    self.requires("mbedtls/2.25.0")
+                else:
+                    self.requires("mbedtls/3.5.2")
+            elif tls_engine == "wolf":
+                self.requires("wolfssl/5.7.2")
 
     def validate(self):
         compiler_minimum_version = {
@@ -108,6 +116,12 @@ class NngConan(ConanFile):
             tc.variables["NNG_ENABLE_COMPAT"] = self.options.compat
         if "with_ipv6" in self.options:
             tc.variables["NNG_ENABLE_IPV6"] = self.options.with_ipv6
+        tc.variables["NNG_TLS_ENGINE"] = self.options.get_safe("tls_engine", "mbed")
+
+        # Prevent linking against unused found library
+        #https://github.com/nanomsg/nng/blob/8396f1df0420bb0156655532b5e6244dc1b3b646/src/platform/posix/CMakeLists.txt#L50C9-L50C22
+        tc.cache_variables["NNG_HAVE_LIBNSL"] = "0"
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -132,7 +146,7 @@ class NngConan(ConanFile):
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.system_libs.extend(["mswsock", "ws2_32"])
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread", "rt", "nsl"])
+            self.cpp_info.system_libs.extend(["pthread", "rt"])
 
         if self.options.shared:
             self.cpp_info.defines.append("NNG_SHARED_LIB")

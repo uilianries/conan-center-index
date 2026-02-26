@@ -1,29 +1,4 @@
 sources:
-  "0.24.1":
-    url: "https://github.com/awslabs/aws-crt-cpp/archive/v0.24.1.tar.gz"
-    sha256: "c627fbc76fc31332801e29872203a11ce0234b7c17e75811277aa913f1550d6f"
-  "0.17.23":
-    url: "https://github.com/awslabs/aws-crt-cpp/archive/v0.17.23.tar.gz"
-    sha256: "28061c3efa493519cfae46e4ea96389f03a81eeec7613d7da861dd8c5f4f6598"
-  "0.17.12":
-    url: "https://github.com/awslabs/aws-crt-cpp/archive/v0.17.12.tar.gz"
-    sha256: "acdd8b83198c5a471f92702bc4101828fe55361005764143704c39acd6f80ffc"
-  "0.14.3":
-    url: "https://github.com/awslabs/aws-crt-cpp/archive/v0.14.3.tar.gz"
-    sha256: "3ea16c43e691bab0c373ba1ad072f6535390c516ebda658dfaf4d074d920e0fb"
-patches:
-  "0.24.1":
-    - patch_file: "patches/0.24.1-fix-cast-error.patch"
-      patch_description: "fix const cast error"
-      patch_type: "portability"
-    - patch_file: "patches/0.24.1-disable-sanitizers.patch"
-      patch_description: "disable sanitizers"
-      patch_type: "conan"
-  "0.17.23":
-    - patch_file: "patches/0.17.23-fix-cast-error.patch"
-      patch_description: "fix const cast error"
-      patch_type: "portability"
-  "0.17.12":
-    - patch_file: "patches/0.17.12-fix-cast-error.patch"
-      patch_description: "fix const cast error"
-      patch_type: "portability"
+  "0.35.2":
+    url: "https://github.com/awslabs/aws-crt-cpp/archive/v0.35.2.tar.gz"
+    sha256: "9d53d7018994a5f7fc879d397032b72ad88b1585a8cc07e2c8c339ae427f0577"

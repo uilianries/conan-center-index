@@ -1,12 +1,9 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, apply_conandata_patches
-from conan.tools.scm import Version
-
+from conan.tools.files import get, copy, rmdir
 import os
-import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class AwsCAuth(ConanFile):
@@ -30,40 +27,19 @@ class AwsCAuth(ConanFile):
         "fPIC": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
+    implements = ["auto_shared_fpic"]
+    languages = "C"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) <= "0.6.17":
-            self.requires("aws-c-common/0.8.2", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-cal/0.5.13")
-            if Version(self.version) < "0.6.17":
-                self.requires("aws-c-io/0.10.20", transitive_headers=True, transitive_libs=True)
-                self.requires("aws-c-http/0.6.13", transitive_headers=True)
-            else:
-                self.requires("aws-c-io/0.13.4", transitive_headers=True, transitive_libs=True)
-                self.requires("aws-c-http/0.6.22", transitive_headers=True)
-            if Version(self.version) >= "0.6.5":
-                self.requires("aws-c-sdkutils/0.1.3", transitive_headers=True)
-        else:
-            self.requires("aws-c-common/0.9.6", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-cal/0.6.9")
-            self.requires("aws-c-io/0.13.35", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-http/0.7.14", transitive_headers=True)
-            self.requires("aws-c-sdkutils/0.1.12", transitive_headers=True)
+        self.requires("aws-c-common/0.12.5", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-cal/0.9.8")
+        # Are we overlinking? This has never been a requirement in upstream's CMakeLists.txt
+        self.requires("aws-c-io/0.23.2", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-http/0.10.5", transitive_headers=True)
+        self.requires("aws-c-sdkutils/0.2.4", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -71,13 +47,13 @@ class AwsCAuth(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables['AWS_STATIC_MSVC_RUNTIME_LIBRARY'] = self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime") == "static"
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -87,27 +63,7 @@ class AwsCAuth(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "aws-c-auth"))
-
-        # TODO: to remove in conan v2 once legacy generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {"AWS::aws-c-auth": "aws-c-auth::aws-c-auth"}
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-c-auth")
@@ -115,7 +71,3 @@ class AwsCAuth(ConanFile):
         self.cpp_info.libs = ["aws-c-auth"]
         if self.options.shared:
             self.cpp_info.defines.append("AWS_AUTH_USE_IMPORT_EXPORT")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

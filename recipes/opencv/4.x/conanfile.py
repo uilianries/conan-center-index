@@ -6,13 +6,13 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.scm import Version
 import os
 import re
 import textwrap
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
+required_conan_version = ">=2.1"
 
 
 OPENCV_MAIN_MODULES_OPTIONS = (
@@ -35,7 +35,7 @@ OPENCV_MAIN_MODULES_OPTIONS = (
 OPENCV_EXTRA_MODULES_OPTIONS = (
     "alphamat",
     "aruco",
-    "barcode",
+#    "barcode", # between 4.5.3 and <4.8.0
     "bgsegm",
     "bioinspired",
     "ccalib",
@@ -107,7 +107,6 @@ class OpenCVConan(ConanFile):
         "parallel": [False, "tbb", "openmp"],
         "with_ipp": [False, "intel-ipp", "opencv-icv"],
         "with_eigen": [True, False],
-        "neon": [True, False],
         "with_opencl": [True, False],
         "with_cuda": [True, False],
         "with_cublas": [True, False],
@@ -122,6 +121,7 @@ class OpenCVConan(ConanFile):
         "with_flatbuffers": [True, False],
         "with_protobuf": [True, False],
         "with_vulkan": [True, False],
+        "with_openvino": [True, False],
         "dnn_cuda": [True, False],
         # highgui module options
         "with_gtk": [True, False],
@@ -166,7 +166,6 @@ class OpenCVConan(ConanFile):
         "parallel": False,
         "with_ipp": False,
         "with_eigen": True,
-        "neon": True,
         "with_opencl": False,
         "with_cuda": False,
         "with_cublas": False,
@@ -181,6 +180,7 @@ class OpenCVConan(ConanFile):
         "with_flatbuffers": True,
         "with_protobuf": True,
         "with_vulkan": False,
+        "with_openvino": False,
         "dnn_cuda": False,
         # highgui module options
         "with_gtk": False,
@@ -191,15 +191,15 @@ class OpenCVConan(ConanFile):
         "with_jpeg": "libjpeg",
         "with_png": True,
         "with_tiff": True,
-        "with_jpeg2000": "jasper",
+        "with_jpeg2000": "openjpeg",
         "with_openexr": True,
         "with_webp": True,
         "with_gdal": False,
         "with_gdcm": False,
-        "with_imgcodec_hdr": False,
-        "with_imgcodec_pfm": False,
-        "with_imgcodec_pxm": False,
-        "with_imgcodec_sunraster": False,
+        "with_imgcodec_hdr": True,
+        "with_imgcodec_pfm": True,
+        "with_imgcodec_pxm": True,
+        "with_imgcodec_sunraster": True,
         "with_msmf": True,
         "with_msmf_dxva": True,
         # objdetect module options
@@ -219,6 +219,14 @@ class OpenCVConan(ConanFile):
     default_options.update({_name: False for _name in OPENCV_EXTRA_MODULES_OPTIONS})
 
     short_paths = True
+
+    @property
+    def _is_cl_like(self):
+        return self.settings.compiler.get_safe("runtime") is not None
+
+    @property
+    def _is_cl_like_static_runtime(self):
+        return self._is_cl_like and "MT" in msvc_runtime_flag(self)
 
     @property
     def _is_mingw(self):
@@ -253,40 +261,8 @@ class OpenCVConan(ConanFile):
         return self.settings.os != "iOS"
 
     @property
-    def _has_alphamat_option(self):
-        return Version(self.version) >= "4.3.0"
-
-    @property
-    def _has_intensity_transform_option(self):
-        return Version(self.version) >= "4.3.0"
-
-    @property
-    def _has_rapid_option(self):
-        return Version(self.version) >= "4.3.0"
-
-    @property
-    def _has_mcc_option(self):
-        return Version(self.version) >= "4.5.0"
-
-    @property
-    def _has_wechat_qrcode_option(self):
-        return Version(self.version) >= "4.5.2"
-
-    @property
-    def _has_barcode_option(self):
-        return Version(self.version) >= "4.5.3" and Version(self.version) < "4.8.0"
-
-    @property
     def _has_with_wayland_option(self):
-        return Version(self.version) >= "4.7.0" and self.settings.os in ["Linux", "FreeBSD"]
-
-    @property
-    def _has_with_avif_option(self):
-        return Version(self.version) >= "4.8.0"
-
-    @property
-    def _has_with_flatbuffers_option(self):
-        return Version(self.version) >= "4.8.0"
+        return self.settings.os in ["Linux", "FreeBSD"]
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -311,32 +287,15 @@ class OpenCVConan(ConanFile):
         else:
             del self.options.with_ffmpeg
 
-        if "arm" not in self.settings.arch:
-            del self.options.neon
         if not self._has_with_jpeg2000_option:
             del self.options.with_jpeg2000
+
         if not self._has_with_tiff_option:
             del self.options.with_tiff
         if not self._has_superres_option:
             del self.options.superres
-        if not self._has_alphamat_option:
-            del self.options.alphamat
-        if not self._has_intensity_transform_option:
-            del self.options.intensity_transform
-        if not self._has_rapid_option:
-            del self.options.rapid
-        if not self._has_mcc_option:
-            del self.options.mcc
-        if not self._has_wechat_qrcode_option:
-            del self.options.wechat_qrcode
-        if not self._has_barcode_option:
-            del self.options.barcode
         if not self._has_with_wayland_option:
             del self.options.with_wayland
-        if not self._has_with_avif_option:
-            del self.options.with_avif
-        if not self._has_with_flatbuffers_option:
-            del self.options.with_flatbuffers
 
         # Conditional default options
         if self._is_mingw:
@@ -350,6 +309,12 @@ class OpenCVConan(ConanFile):
             # in a big dependency graph
             if not self._has_with_wayland_option:
                 self.options.with_gtk = True
+
+        if is_msvc(self) and self.settings.arch == "armv8":
+            # See https://github.com/opencv/opencv/issues/25052
+            #     https://github.com/opencv/opencv/pull/24698#issuecomment-1858023908
+            self.options.cpu_baseline = "NEON"
+            self.options.cpu_dispatch = ""
 
     @property
     def _opencv_modules(self):
@@ -399,7 +364,7 @@ class OpenCVConan(ConanFile):
             return []
 
         def parallel():
-            return ["onetbb::onetbb"] if self.options.parallel == "tbb" else []
+            return ["onetbb::libtbb"] if self.options.parallel == "tbb" else []
 
         def protobuf():
             return ["protobuf::protobuf"] if self.options.get_safe("with_protobuf") else []
@@ -421,6 +386,9 @@ class OpenCVConan(ConanFile):
 
         def xkbcommon():
             return ["xkbcommon::libxkbcommon"] if self.options.get_safe("with_wayland") else []
+
+        def openvino():
+            return ["openvino::Runtime"] if self.options.get_safe("with_openvino") else []
 
         def opencv_calib3d():
             return ["opencv_calib3d"] if self.options.calib3d else []
@@ -496,7 +464,7 @@ class OpenCVConan(ConanFile):
             "dnn": {
                 "is_built": self.options.dnn,
                 "mandatory_options": ["imgproc"],
-                "requires": ["opencv_core", "opencv_imgproc"] + protobuf() + vulkan() + ipp(),
+                "requires": ["opencv_core", "opencv_imgproc"] + protobuf() + vulkan() + ipp() + openvino(),
             },
             "features2d": {
                 "is_built": self.options.features2d,
@@ -510,7 +478,7 @@ class OpenCVConan(ConanFile):
             "gapi": {
                 "is_built": self.options.gapi,
                 "mandatory_options": ["imgproc"],
-                "requires": ["opencv_imgproc", "ade::ade"],
+                "requires": ["opencv_imgproc", "ade::ade"] + openvino(),
                 "system_libs": [
                     (self.settings.os == "Windows", ["ws2_32", "wsock32"]),
                 ],
@@ -591,11 +559,6 @@ class OpenCVConan(ConanFile):
                 "mandatory_options": ["calib3d", "imgproc"],
                 "requires": ["opencv_core", "opencv_calib3d", "opencv_imgproc"] + ipp(),
             },
-            "barcode": {
-                "is_built": self.options.get_safe("barcode"),
-                "mandatory_options": ["dnn", "imgproc"],
-                "requires": ["opencv_core", "opencv_dnn", "opencv_imgproc"] + ipp(),
-            },
             "bgsegm": {
                 "is_built": self.options.bgsegm,
                 "mandatory_options": ["calib3d", "imgproc", "video"],
@@ -654,7 +617,7 @@ class OpenCVConan(ConanFile):
             "cudaoptflow": {
                 "is_built": self.options.cudaoptflow,
                 "mandatory_options": ["with_cuda", "video", "cudaarithm", "cudaimgproc", "cudawarping", "optflow"],
-                "requires": ["opencv_video", "opencv_cudaarithm", "cudaimgproc", "opencv_cudawarping",
+                "requires": ["opencv_video", "opencv_cudaarithm", "opencv_cudaimgproc", "opencv_cudawarping",
                              "opencv_optflow"] + opencv_cudalegacy() + ipp(),
             },
             "cudastereo": {
@@ -894,31 +857,19 @@ class OpenCVConan(ConanFile):
             },
         }
 
-        if Version(self.version) >= "4.3.0":
-            opencv_modules["gapi"].setdefault("requires", []).extend(opencv_video())
-        if Version(self.version) >= "4.5.2":
-            opencv_modules["gapi"].setdefault("requires", []).extend(opencv_calib3d())
-        if Version(self.version) >= "4.5.4":
-            opencv_modules["objdetect"].setdefault("requires", []).extend(opencv_dnn())
-        if Version(self.version) >= "4.5.1":
-            opencv_modules["video"].setdefault("requires", []).extend(opencv_dnn())
-        if Version(self.version) >= "4.4.0":
-            opencv_modules["intensity_transform"].setdefault("mandatory_options", []).append("imgproc")
-            opencv_modules["intensity_transform"].setdefault("requires", []).append("opencv_imgproc")
-        if Version(self.version) < "4.3.0":
-            opencv_modules["stereo"].setdefault("mandatory_options", []).extend(["calib3d", "video"])
-            opencv_modules["stereo"].setdefault("requires", []).extend(["opencv_calib3d", "opencv_video"])
-        if Version(self.version) >= "4.7.0":
-            opencv_modules["aruco"].setdefault("mandatory_options", []).append("objdetect")
-            opencv_modules["aruco"].setdefault("requires", []).append("opencv_objdetect")
-            opencv_modules["cudacodec"].setdefault("mandatory_options", []).extend(["cudaarithm", "cudawarping"])
-            opencv_modules["cudacodec"].setdefault("requires", []).extend(["opencv_cudaarithm", "opencv_cudawarping"])
-            opencv_modules["wechat_qrcode"].setdefault("mandatory_options", []).append("objdetect")
-            opencv_modules["wechat_qrcode"].setdefault("requires", []).append("opencv_objdetect")
-        else:
-            opencv_modules["cudacodec"].setdefault("requires", []).append("opencv_cudev")
-        if Version(self.version) < "4.8.0":
-            opencv_modules["dnn"].setdefault("mandatory_options", []).append("with_protobuf")
+
+        opencv_modules["gapi"].setdefault("requires", []).extend(opencv_video())
+        opencv_modules["gapi"].setdefault("requires", []).extend(opencv_calib3d())
+        opencv_modules["objdetect"].setdefault("requires", []).extend(opencv_dnn())
+        opencv_modules["video"].setdefault("requires", []).extend(opencv_dnn())
+        opencv_modules["intensity_transform"].setdefault("mandatory_options", []).append("imgproc")
+        opencv_modules["intensity_transform"].setdefault("requires", []).append("opencv_imgproc")
+        opencv_modules["aruco"].setdefault("mandatory_options", []).append("objdetect")
+        opencv_modules["aruco"].setdefault("requires", []).append("opencv_objdetect")
+        opencv_modules["cudacodec"].setdefault("mandatory_options", []).extend(["cudaarithm", "cudawarping"])
+        opencv_modules["cudacodec"].setdefault("requires", []).extend(["opencv_cudaarithm", "opencv_cudawarping"])
+        opencv_modules["wechat_qrcode"].setdefault("mandatory_options", []).append("objdetect")
+        opencv_modules["wechat_qrcode"].setdefault("requires", []).append("opencv_objdetect")
 
         return opencv_modules
 
@@ -1030,6 +981,9 @@ class OpenCVConan(ConanFile):
         # Call this first before any further manipulation of options based on other options
         self._solve_internal_dependency_graph(self._opencv_modules)
 
+        if not (self.options.gapi or self.options.dnn):
+            self.options.rm_safe("with_openvino")
+
         if not self.options.dnn:
             self.options.rm_safe("dnn_cuda")
             self.options.rm_safe("with_flatbuffers")
@@ -1094,6 +1048,8 @@ class OpenCVConan(ConanFile):
             self.requires("protobuf/3.21.12", transitive_libs=True)
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-headers/1.3.268.0")
+        if self.options.get_safe("with_openvino"):
+            self.requires("openvino/[>=2024.5.0 <=2025.0.0]")
         # gapi module dependencies
         if self.options.gapi:
             self.requires("ade/0.1.2d")
@@ -1109,23 +1065,23 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_avif"):
             self.requires("libavif/1.0.4")
         if self.options.get_safe("with_jpeg") == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
-            self.requires("mozjpeg/4.1.5")
+            self.requires("mozjpeg/[>=4.1.5 <5]")
         if self.options.get_safe("with_jpeg2000") == "jasper":
-            self.requires("jasper/4.2.0")
+            self.requires("jasper/[>=4.2.0 <5]")
         elif self.options.get_safe("with_jpeg2000") == "openjpeg":
-            self.requires("openjpeg/2.5.2")
+            self.requires("openjpeg/[>=2.5.2 <5]")
         if self.options.get_safe("with_png"):
             self.requires("libpng/[>=1.6 <2]")
         if self.options.get_safe("with_openexr"):
-            self.requires("openexr/3.2.3")
+            self.requires("openexr/[>=3.2.3 <4]")
         if self.options.get_safe("with_tiff"):
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.get_safe("with_webp"):
-            self.requires("libwebp/1.3.2")
+            self.requires("libwebp/[>=1.3.2 <5]")
         if self.options.get_safe("with_gdal"):
             self.requires("gdal/3.8.3")
         if self.options.get_safe("with_gdcm"):
@@ -1135,12 +1091,11 @@ class OpenCVConan(ConanFile):
             self.requires("quirc/1.2")
         # videoio module dependencies
         if self.options.get_safe("with_ffmpeg"):
-            # opencv doesn't support ffmpeg >= 5.0.0 for the moment (until 4.5.5 at least)
-            self.requires("ffmpeg/4.4.4")
+            self.requires("ffmpeg/[>=4.4.4 <8]")
         # freetype module dependencies
         if self.options.freetype:
             self.requires("freetype/2.13.2")
-            self.requires("harfbuzz/8.3.0")
+            self.requires("harfbuzz/[>=8.3.0]")
         # hdf module dependencies
         if self.options.hdf:
             self.requires("hdf5/1.14.3")
@@ -1190,8 +1145,8 @@ class OpenCVConan(ConanFile):
         self._check_mandatory_options(self._opencv_modules)
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
+        if self.options.shared and self._is_cl_like and self._is_cl_like_static_runtime:
+            raise ConanInvalidConfiguration("MSVC or clang-cl with static runtime are not supported for shared library.")
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "4":
             raise ConanInvalidConfiguration("Clang 3.x can't build OpenCV 4.x due to an internal bug.")
         if self.options.get_safe("dnn_cuda") and \
@@ -1245,8 +1200,7 @@ class OpenCVConan(ConanFile):
         ## Fix link to several dependencies
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "${GDAL_LIBRARY}", "GDAL::GDAL")
-        if Version(self.version) >= "4.8.0":
-            replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "${AVIF_LIBRARY}", "avif")
+        replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "${AVIF_LIBRARY}", "avif")
 
         ## Fix detection of ffmpeg
         replace_in_file(self, os.path.join(self.source_folder, "modules", "videoio", "cmake", "detect_ffmpeg.cmake"),
@@ -1292,10 +1246,9 @@ class OpenCVConan(ConanFile):
                             "find_package(Protobuf QUIET)",
                             "find_package(Protobuf REQUIRED MODULE)")
             # in 'if' block, get_target_property() produces an error
-            if Version(self.version) >= "4.4.0":
-                replace_in_file(self, find_protobuf,
-                                      'if(TARGET "${Protobuf_LIBRARIES}")',
-                                      'if(FALSE)  # patch: disable if(TARGET "${Protobuf_LIBRARIES}")')
+            replace_in_file(self, find_protobuf,
+                                    'if(TARGET "${Protobuf_LIBRARIES}")',
+                                    'if(FALSE)  # patch: disable if(TARGET "${Protobuf_LIBRARIES}")')
 
         # Patches in opencv_contrib
         # -------------------------
@@ -1380,8 +1333,7 @@ class OpenCVConan(ConanFile):
             # libavcodec;libavformat;libavutil;libswscale modules
             tc.variables["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = "ffmpeg"
             tc.variables["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
-            if Version(self.version) >= "4.7.0":
-                tc.variables["OPENCV_FFMPEG_ENABLE_LIBAVDEVICE"] = False
+            tc.variables["OPENCV_FFMPEG_ENABLE_LIBAVDEVICE"] = False
             ffmpeg_libraries = []
             for component in ["avcodec",  "avformat", "avutil", "swscale", "avresample"]:
                 if component == "avutil" or self.dependencies["ffmpeg"].options.get_safe(component):
@@ -1445,7 +1397,7 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_GDAL"] = self.options.get_safe("with_gdal", False)
         tc.variables["WITH_GDCM"] = self.options.get_safe("with_gdcm", False)
         tc.variables["WITH_EIGEN"] = self.options.with_eigen
-        tc.variables["WITH_DSHOW"] = is_msvc(self)
+        tc.variables["WITH_DSHOW"] = self._is_cl_like
         tc.variables["WITH_MSMF"] = self.options.get_safe("with_msmf", False)
         tc.variables["WITH_MSMF_DXVA"] = self.options.get_safe("with_msmf_dxva", False)
         tc.variables["OPENCV_MODULES_PUBLIC"] = "opencv"
@@ -1457,26 +1409,28 @@ class OpenCVConan(ConanFile):
         if self.options.cpu_dispatch or self.options.cpu_dispatch == "":
             tc.variables["CPU_DISPATCH"] = self.options.cpu_dispatch
 
-        tc.variables["ENABLE_NEON"] = self.options.get_safe("neon", False)
-
         tc.variables["OPENCV_DNN_CUDA"] = self.options.get_safe("dnn_cuda", False)
 
-        if Version(self.version) >= "4.6.0":
-            tc.variables["WITH_OPENVINO"] = False
-            tc.variables["WITH_TIMVX"] = False
-        else:
-            tc.variables["WITH_INF_ENGINE"] = False
-            tc.variables["WITH_NGRAPH"] = False
+        tc.variables["WITH_OPENVINO"] = self.options.get_safe("with_openvino", False)
+        tc.variables["WITH_TIMVX"] = False
 
-        if Version(self.version) >= "4.7.0":
-            tc.variables["ENABLE_DELAYLOAD"] = False
-            tc.variables["WITH_CANN"] = False
-            tc.variables["WITH_SPNG"] = False # TODO: change with_png recipe option in order to use either libpng or libspng
-            tc.variables["WITH_WAYLAND"] = self.options.get_safe("with_wayland", False)
+        tc.variables["ENABLE_DELAYLOAD"] = False
+        tc.variables["WITH_CANN"] = False
+        tc.variables["WITH_SPNG"] = False # TODO: change with_png recipe option in order to use either libpng or libspng
+        tc.variables["WITH_WAYLAND"] = self.options.get_safe("with_wayland", False)
 
-        if Version(self.version) >= "4.8.0":
-            tc.variables["WITH_AVIF"] = self.options.get_safe("with_avif", False)
-            tc.variables["WITH_FLATBUFFERS"] = self.options.get_safe("with_flatbuffers", False)
+        tc.variables["WITH_AVIF"] = self.options.get_safe("with_avif", False)
+        tc.variables["WITH_FLATBUFFERS"] = self.options.get_safe("with_flatbuffers", False)
+
+        tc.variables["WITH_KLEIDICV"] = False
+        tc.variables["WITH_NDSRVP"] = False
+        tc.variables["OBSENSOR_USE_ORBBEC_SDK"] = False
+        if is_apple_os(self):
+            # default behavior for 4.9.0
+            tc.variables["WITH_OBSENSOR"] = False
+        tc.variables["WITH_ZLIB_NG"] = False
+
+        tc.variables["WITH_HAL_RVV"] = False
 
         # Special world option merging all enabled modules into one big library file
         tc.variables["BUILD_opencv_world"] = self.options.world
@@ -1497,8 +1451,7 @@ class OpenCVConan(ConanFile):
         for module in OPENCV_EXTRA_MODULES_OPTIONS:
             tc.variables[f"BUILD_opencv_{module}"] = self.options.get_safe(module, False)
         tc.variables["BUILD_opencv_cnn_3dobj"] = False
-        if Version(self.version) >= "4.4.0":
-            tc.variables["BUILD_opencv_julia"] = False
+        tc.variables["BUILD_opencv_julia"] = False
         tc.variables["BUILD_opencv_matlab"] = False
         if self.options.text:
             tc.variables["WITH_TESSERACT"] = self.options.with_tesseract
@@ -1522,8 +1475,8 @@ class OpenCVConan(ConanFile):
         tc.variables["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         tc.variables["ENABLE_CCACHE"] = False
 
-        if is_msvc(self):
-            tc.variables["BUILD_WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
+        if self._is_cl_like:
+            tc.variables["BUILD_WITH_STATIC_CRT"] = self._is_cl_like_static_runtime
 
         if self.settings.os == "Android":
             tc.variables["BUILD_ANDROID_EXAMPLES"] = False
@@ -1569,15 +1522,6 @@ class OpenCVConan(ConanFile):
 
         self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_vars_rel_path))
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        targets_mapping = {self._cmake_target(k): f"opencv::{self._cmake_target(k)}" for k in self._opencv_modules.keys()}
-        if self.options.world:
-            targets_mapping.update({"opencv_world": "opencv::opencv_world"})
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_target_rel_path),
-            targets_mapping,
-        )
-
     def _create_cmake_module_variables(self, module_file):
         """
         Define several CMake variables from upstream CMake config file not defined by default by CMakeDeps.
@@ -1598,17 +1542,6 @@ class OpenCVConan(ConanFile):
                 set(OpenCV_VERSION_PATCH {v.patch})
             endif()
         """)
-        save(self, module_file, content)
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
         save(self, module_file, content)
 
     @property
@@ -1704,15 +1637,8 @@ class OpenCVConan(ConanFile):
                     self.cpp_info.components[conan_component].system_libs = module_system_libs
                     self.cpp_info.components[conan_component].frameworks = module_frameworks
 
-                # TODO: to remove in conan v2 once cmake_find_package* generators removed
-                self.cpp_info.components[conan_component].names["cmake_find_package"] = cmake_target
-                self.cpp_info.components[conan_component].names["cmake_find_package_multi"] = cmake_target
-                self.cpp_info.components[conan_component].build_modules["cmake_find_package"] = [self._module_vars_rel_path, self._module_target_rel_path]
-                self.cpp_info.components[conan_component].build_modules["cmake_find_package_multi"] = [self._module_vars_rel_path, self._module_target_rel_path]
                 if module != cmake_target:
                     conan_component_alias = conan_component + "_alias"
-                    self.cpp_info.components[conan_component_alias].names["cmake_find_package"] = module
-                    self.cpp_info.components[conan_component_alias].names["cmake_find_package_multi"] = module
                     self.cpp_info.components[conan_component_alias].requires = [conan_component]
                     self.cpp_info.components[conan_component_alias].bindirs = []
                     self.cpp_info.components[conan_component_alias].includedirs = []
@@ -1723,15 +1649,8 @@ class OpenCVConan(ConanFile):
                 self.cpp_info.components["opencv_world"].system_libs = list(world_system_libs)
                 self.cpp_info.components["opencv_world"].frameworks = list(world_frameworks)
 
-                # TODO: to remove in conan v2 once cmake_find_package* generators removed
-                self.cpp_info.components["opencv_world"].build_modules["cmake_find_package"] = [self._module_vars_rel_path, self._module_target_rel_path]
-                self.cpp_info.components["opencv_world"].build_modules["cmake_find_package_multi"] = [self._module_vars_rel_path, self._module_target_rel_path]
-
         self.cpp_info.set_property("cmake_file_name", "OpenCV")
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
 
         add_components(self._opencv_modules)
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "OpenCV"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCV"

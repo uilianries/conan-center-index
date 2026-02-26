@@ -23,10 +23,12 @@ class UtilLinuxLibuuidConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_python_bindings": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_python_bindings": True,
     }
 
     @property
@@ -82,6 +84,8 @@ class UtilLinuxLibuuidConan(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--disable-all-programs")
         tc.configure_args.append("--enable-libuuid")
+        if not self.options.with_python_bindings:
+            tc.configure_args.append("--without-python")
         if self._has_sys_file_header:
             tc.extra_defines.append("HAVE_SYS_FILE_H")
         if "x86" in self.settings.arch:
@@ -133,3 +137,6 @@ class UtilLinuxLibuuidConan(ConanFile):
 
         self.cpp_info.libs = ["uuid"]
         self.cpp_info.includedirs.append(os.path.join("include", "uuid"))
+
+        if self.settings.os == "Linux" and Version(self.version) >= "2.41.2":
+            self.cpp_info.system_libs.extend(["pthread"])

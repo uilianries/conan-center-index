@@ -24,6 +24,8 @@ class MlpackConan(ConanFile):
 
     @property
     def _min_cppstd(self):
+        if Version(self.version) >= "4.4.0":
+            return 17
         if is_msvc(self):
             return 17
         return 14
@@ -46,9 +48,6 @@ class MlpackConan(ConanFile):
         self.requires("cereal/1.3.2")
         self.requires("ensmallen/2.21.0")
         self.requires("stb/cci.20230920")
-        # TODO: MSVC OpenMP is not compatible, enable for MSVC after #22353
-        if not is_msvc(self):
-            self.requires("llvm-openmp/17.0.6")
 
     def package_id(self):
         self.info.clear()
@@ -82,23 +81,6 @@ class MlpackConan(ConanFile):
              excludes=["mlpack/bindings/*", "mlpack/tests/*", "mlpack/CMakeLists.txt"])
         self._configure_headers()
 
-    @property
-    def _openmp_flags(self):
-        # Based on https://github.com/Kitware/CMake/blob/v3.28.1/Modules/FindOpenMP.cmake#L104-L135
-        if self.settings.compiler == "clang":
-            return ["-fopenmp=libomp"]
-        elif self.settings.compiler == "apple-clang":
-            return ["-Xclang", "-fopenmp"]
-        elif self.settings.compiler == "gcc":
-            return ["-fopenmp"]
-        elif self.settings.compiler == "intel-cc":
-            return ["-Qopenmp"]
-        elif self.settings.compiler == "sun-cc":
-            return ["-xopenmp"]
-        elif is_msvc(self):
-            return ["-openmp:llvm"]
-        return None
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "mlpack")
         self.cpp_info.set_property("cmake_target_name", "mlpack::mlpack")
@@ -113,12 +95,18 @@ class MlpackConan(ConanFile):
         if self.settings.get_safe("compiler.libcxx") in ["libstdc++", "libstdc++11"]:
             self.cpp_info.system_libs.append("atomic")
 
-        self.cpp_info.cflags = self._openmp_flags
-        self.cpp_info.cxxflags = self._openmp_flags
-
+        if self.settings.compiler in ("clang", "gcc"):
+            # this is a header only library, so downstream consumers need to enable the openmp flag
+            compiler_flags = ["-fopenmp"]
+            link_flags = ["-fopenmp"]
+            if self.settings.os == "Windows":
+                compiler_flags.append("-Wa,-mbig-obj")
+            self.cpp_info.cflags = compiler_flags
+            self.cpp_info.cxxflags = compiler_flags
+            self.cpp_info.sharedlinkflags = link_flags
+            self.cpp_info.exelinkflags = link_flags
+        elif is_msvc(self):
         # https://github.com/mlpack/mlpack/blob/4.3.0/CMakeLists.txt#L164-L175
-        if is_msvc(self):
-            self.cpp_info.cxxflags.extend(["/bigobj", "/Zm200", "/Zc:__cplusplus"])
-        elif self.settings.os == "Windows" and self.settings.compiler == "gcc":
-            self.cpp_info.cflags.append("-Wa,-mbig-obj")
-            self.cpp_info.cxxflags.append("-Wa,-mbig-obj")
+            compiler_flags = ["/openmp", "/bigobj", "/Zm200", "/Zc:__cplusplus"]
+            self.cpp_info.cflags = compiler_flags
+            self.cpp_info.cxxflags = compiler_flags

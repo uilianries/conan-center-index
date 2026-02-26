@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rm, rmdir, replace_in_file
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path, is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild
@@ -61,6 +61,9 @@ class CyrusSaslConan(ConanFile):
         "with_saslauthd": True,
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
@@ -92,7 +95,7 @@ class CyrusSaslConan(ConanFile):
         if is_msvc(self) or self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_postgresql"):
-            self.requires("libpq/15.4")
+            self.requires("libpq/[>=15.4 <18]")
         if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.1.0")
         if self.options.get_safe("with_sqlite3"):
@@ -112,6 +115,7 @@ class CyrusSaslConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def _generate_autotools(self):
         env = VirtualBuildEnv(self)
@@ -253,6 +257,3 @@ class CyrusSaslConan(ConanFile):
                 self.cpp_info.system_libs.append("crypt")
         elif is_msvc(self):
             self.cpp_info.system_libs = ["ws2_32"]
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
