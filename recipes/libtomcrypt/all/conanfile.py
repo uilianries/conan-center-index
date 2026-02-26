@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import copy, chdir, get, rmdir, rm
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, NMakeToolchain, NMakeDeps
+from conan.tools.microsoft import is_msvc, NMakeToolchain, NMakeDeps, msvc_runtime_flag
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 import os
 
@@ -119,10 +119,23 @@ class LibtomcryptConan(ConanFile):
         if cc:
             args.append(f"CC={cc}")
 
+        tommath_include = os.path.join(self.dependencies["libtommath"].cpp_info.includedirs[0]).replace("\\", "/")
+        tommath_libdir = os.path.join(self.dependencies["libtommath"].cpp_info.libdirs[0]).replace("\\", "/")
+        tommath_lib = self.dependencies["libtommath"].cpp_info.libs[0]
+
         defs = self.conf.get("tools.build:defines", default=[], check_type=list)
         defs.extend(["USE_LTM", "LTM_DESC"])
-        if defs:
-            args.append(f"CFLAGS=\"{' '.join(f'/D{d}' for d in defs)}\"")
+
+        cflags = self.conf.get("tools.build:cflags", default=[], check_type=list)
+        cflags.append(f"/I'{tommath_include}'")
+        if self.settings.build_type == "Release":
+            cflags.append("/Ox /DNDEBUG")
+        cflags.append(f"/{msvc_runtime_flag(self)}")
+        cflags.extend(f"/D{d}" for d in defs)
+        args.append(f"CFLAGS=\"{' '.join(cflags)}\"")
+
+        extralibs = f"EXTRALIBS=\"/link /LIBPATH:'{tommath_libdir}' {tommath_lib}.lib\""
+        args.append(extralibs)
 
         ldflags = self.conf.get("tools.build:sharedlinkflags", default=[], check_type=list)
         if ldflags:
@@ -157,3 +170,5 @@ class LibtomcryptConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tomcrypt"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread"]
