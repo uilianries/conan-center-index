@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import copy, chdir, get, rmdir, rm
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, NMakeToolchain, NMakeDeps
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 import os
 
@@ -27,16 +27,26 @@ class LibtomcryptConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def build_requirements(self):
+        if self.settings_build.os == "Windows":
+            if not self.conf_info.get("tools.gnu:make_program", check_type=str):
+                self.tool_requires("make/4.4.1")
+
     def requirements(self):
         self.requires("libtommath/1.3.0")
 
     def generate(self):
-        tc = AutotoolsDeps(self)
-        tc.generate()
-        
-        tc = AutotoolsToolchain(self)
-        tc.make_args = self._make_args()
-        tc.generate()
+        if is_msvc(self):
+            tc = NMakeToolchain(self)
+            tc.generate()
+            tc = NMakeDeps(self)
+            tc.generate()
+        else:
+            tc = AutotoolsDeps(self)
+            tc.generate()
+            tc = AutotoolsToolchain(self)
+            tc.make_args = self._make_args()
+            tc.generate()
 
     @property
     def _makefile(self):
@@ -100,17 +110,47 @@ class LibtomcryptConan(ConanFile):
 
         return args
 
+    def _nmake_args(self):
+        prefix = self.package_folder.replace("\\", "/")
+        args = [f"PREFIX={prefix}"]
+
+        compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+        cc = compilers_from_conf.get("c", "cl")
+        if cc:
+            args.append(f"CC={cc}")
+
+        defs = self.conf.get("tools.build:defines", default=[], check_type=list)
+        defs.extend(["USE_LTM", "LTM_DESC"])
+        if defs:
+            args.append(f"CFLAGS=\"{' '.join(f'/D{d}' for d in defs)}\"")
+
+        ldflags = self.conf.get("tools.build:sharedlinkflags", default=[], check_type=list)
+        if ldflags:
+            args.append(f"LDFLAGS=\"{' '.join(ldflags)}\"")
+
+        return args
+
     def build(self):
         with chdir(self, self.source_folder):
-            autotools = Autotools(self)
-            autotools.make(makefile=self._makefile)
+            if is_msvc(self):
+                make_args = self._nmake_args()
+                self.run(f"nmake -f {self._makefile} {' '.join(make_args)}")
+            else:
+                autotools = Autotools(self)
+                autotools.make(makefile=self._makefile)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         with chdir(self, self.source_folder):
-            autotools = Autotools(self) 
-            autotools.install(makefile=self._makefile)
+            if is_msvc(self):
+                make_args = self._nmake_args()
+                self.run(f"nmake -f {self._makefile} install {' '.join(make_args)}")
+            else:
+                autotools = Autotools(self)
+                autotools.install(makefile=self._makefile)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        # INFO: bin dir is empty by created during the install step
+        rmdir(self, os.path.join(self.package_folder, "bin"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         if self.options.shared:
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
