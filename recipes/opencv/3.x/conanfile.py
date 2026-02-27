@@ -105,7 +105,7 @@ class OpenCVConan(ConanFile):
             self.requires("gflags/2.2.2")
             self.requires("glog/0.6.0")
         if self.options.get_safe("with_gtk"):
-            self.requires("gtk/system")
+            self.requires("gtk/3.24.51")
 
     def validate(self):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
@@ -241,7 +241,7 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_MSMF"] = is_msvc(self)
         tc.variables["WITH_MSMF_DXVA"] = is_msvc(self)
         tc.variables["WITH_GTK"] = self.options.get_safe("with_gtk", False)
-        tc.variables["WITH_GTK_2_X"] = self.options.get_safe("with_gtk", False)
+        tc.variables["WITH_GTK_2_X"] = False
         tc.variables["OPENCV_MODULES_PUBLIC"] = "opencv"
         tc.variables["OPENCV_ENABLE_NONFREE"] = self.options.nonfree
         if self.options.parallel:

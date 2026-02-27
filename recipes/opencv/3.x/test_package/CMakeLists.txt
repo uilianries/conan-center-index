@@ -3,6 +3,7 @@ project(test_package LANGUAGES CXX)
 
 option(built_contrib "Enabled if opencv is built contrib sfm" OFF)
 
+find_package(Glib CONFIG REQUIRED)
 find_package(OpenCV REQUIRED core imgproc CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
