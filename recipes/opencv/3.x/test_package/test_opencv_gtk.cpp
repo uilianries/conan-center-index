@@ -1,9 +1,10 @@
+#include <cstdio>
+
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <opencv/cv.h>
 #include <opencv/cxcore.h>
 
-#include <stdio.h>
 
 gint t = 0;
 IplImage* opencvImage;
