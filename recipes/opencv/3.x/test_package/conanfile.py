@@ -13,8 +13,7 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires(self.tested_reference_str)
-        self.requires("glib/2.85.3")
+        self.requires(self.tested_reference_str)        
         self.requires("gtk/3.24.51")
         self.requires("gdk-pixbuf/[>=2.42 <3]")
 

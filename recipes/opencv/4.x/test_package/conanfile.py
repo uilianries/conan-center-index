@@ -1,48 +1,30 @@
 from conan import ConanFile
-from conan.tools.build import build_jobs, can_run
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import chdir
+from conan.tools.build import can_run
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain, CMakeDeps
+import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualRunEnv"
-    test_type = "explicit"
-
-    @property
-    def _tested_modules(self):
-        return [
-            # Main modules
-            "calib3d", "core", "dnn", "features2d", "flann", "gapi", "highgui", "imgcodecs",
-            "imgproc", "ml", "objdetect", "photo", "stitching", "video", "videoio",
-            # Extra modules
-            "alphamat", "aruco", "bgsegm", "bioinspired", "ccalib", "datasets", "dnn_superres",
-            "face", "freetype", "fuzzy", "hdf", "hfs", "img_hash", "intensity_transform",
-            "line_descriptor", "mcc", "optflow", "phase_unwrapping", "plot", "quality", "reg",
-            "rgbd", "saliency", "sfm", "shape", "structured_light", "superres",
-            "surface_matching", "text", "tracking", "wechat_qrcode", "xfeatures2d",
-            "ximgproc", "xobjdetect", "xphoto",
-        ]
 
     def layout(self):
         cmake_layout(self)
+        
+    def generate(self):
+        pc = PkgConfigDeps(self)
+        pc.generate()
+        
+        deps = CMakeDeps(self)
+        deps.generate()
+        
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        for module in self._tested_modules:
-            cmake_option = f"OPENCV_WITH_{module.upper()}"
-            if module == "core":
-                tc.variables[cmake_option] = True
-            elif module == "imgcodecs":
-                tc.variables[cmake_option] = self.dependencies["opencv"].options.imgcodecs and self.dependencies["opencv"].options.with_png
-            elif module == "videoio":
-                tc.variables[cmake_option] = self.dependencies["opencv"].options.videoio and self.dependencies["opencv"].options.with_ffmpeg
-            else:
-                tc.variables[cmake_option] = self.dependencies["opencv"].options.get_safe(module, False)
-        tc.generate()
+        self.requires("gtk/3.24.51")
+        self.requires("gdk-pixbuf/[>=2.42 <3]")
 
     def build(self):
         cmake = CMake(self)
@@ -51,5 +33,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            with chdir(self, self.build_folder):
-                self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {build_jobs(self)}", env="conanrun")
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "core", "test_package")
+            self.run(bin_path, env="conanrun")
