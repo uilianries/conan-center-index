@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -256,7 +257,11 @@ class OpenCVConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
-        CMakeDeps(self).generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+        
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def build(self):
         self._patch_sources()

@@ -16,6 +16,7 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
         self.requires("glib/2.85.3")
         self.requires("gtk/3.24.51")
+        self.requires("gdk-pixbuf/[>=2.42 <3]")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -29,5 +30,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "core", "test_package")
             self.run(bin_path, env="conanrun")
