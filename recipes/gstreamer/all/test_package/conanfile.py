@@ -15,6 +15,10 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        # VA-API elements come from gst-plugins-bad (not this package); libva satisfies the
+        # runtime deps when GST_PLUGIN_PATH points at a VA-enabled plugin build.
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.requires("libva/2.23.0")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
