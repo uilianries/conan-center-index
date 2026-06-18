@@ -1,0 +1,925 @@
+
+======== Exporting recipe to the cache ========
+librsvg/2.62.3: [HOOK - hook_run_linter.py] pre_export(): RUN: conanlint check /home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/../**/*
+Success: No issues found in 4 files
+
+librsvg/2.62.3: Exporting package recipe: /home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/conanfile.py
+librsvg/2.62.3: exports: File 'conandata.yml' found. Exporting it...
+librsvg/2.62.3: Copied 1 '.py' file: conanfile.py
+librsvg/2.62.3: Copied 1 '.yml' file: conandata.yml
+librsvg/2.62.3: Exported to cache folder: /home/uilian/.conan2/p/librs3269a33760199/e
+librsvg/2.62.3: Exported: librsvg/2.62.3#abe174fc0c191019ff73ee62792789f8 (2026-06-18 14:55:03 UTC)
+
+======== Input profiles ========
+Profile host:
+[settings]
+arch=x86_64
+build_type=Release
+compiler=gcc
+compiler.cppstd=gnu17
+compiler.libcxx=libstdc++11
+compiler.version=13
+os=Linux
+[options]
+*/*:shared=True
+[conf]
+tools.build:compiler_executables={'c': '/usr/bin/gcc-13', 'cpp': '/usr/bin/g++-13'}
+tools.build:verbosity=verbose
+tools.cmake.cmaketoolchain:generator=Ninja
+tools.compilation:verbosity=verbose
+tools.system.package_manager:mode=install
+tools.system.package_manager:sudo=true
+
+Profile build:
+[settings]
+arch=x86_64
+build_type=Release
+compiler=gcc
+compiler.cppstd=gnu17
+compiler.libcxx=libstdc++11
+compiler.version=13
+os=Linux
+[conf]
+tools.build:compiler_executables={'c': '/usr/bin/gcc-13', 'cpp': '/usr/bin/g++-13'}
+tools.build:verbosity=verbose
+tools.cmake.cmaketoolchain:generator=Ninja
+tools.compilation:verbosity=verbose
+tools.system.package_manager:mode=install
+tools.system.package_manager:sudo=true
+
+
+======== Computing dependency graph ========
+elfutils/0.190: WARN: deprecated: build_requires is deprecated, prefer to use tool_requires with correct traits
+elfutils/0.190: WARN: deprecated: build_requires is deprecated, prefer to use tool_requires with correct traits
+elfutils/0.190: WARN: deprecated: build_requires is deprecated, prefer to use tool_requires with correct traits
+Graph root
+    cli
+Requirements
+    brotli/1.1.0#3f631ef77008f7b5eb388780116371a3 - Cache
+    bzip2/1.0.8#c470882369c2d95c5c77e970c0c7e321 - Cache
+    cairo/1.18.4#a3845ccec428be648572c84a65f74f15 - Cache
+    elfutils/0.190#8e8c47bd9b2578e29a0341b09b977be8 - Cache
+    expat/2.8.1#e2fa0a1a12da326521a3d622a475047a - Cache
+    fontconfig/2.17.1#c7138aa09e0fcc0e337511719c9bfb12 - Cache
+    freetype/2.14.3#4ee27b7918b546a96d7e6898e3a02b34 - Cache
+    fribidi/1.0.13#205942bdceca0837df53e7ebb0aaa86a - Cache
+    glib/2.85.3#2fef4f1c3f92c9eaf077ccd54b9404a3 - Cache
+    harfbuzz/12.3.0#a5fef061896cd5c30e9a17c9d7920ad1 - Cache
+    libffi/3.4.8#a045c00fb26779635e3bed40e80c5254 - Cache
+    libiconv/1.17#9923bc6dc6f106646d6967e0039a5ada - Cache
+    libmount/2.39.2#64850679fa9d5ead878e5076b0cab2a8 - Cache
+    libpng/1.6.58#19cb72905ae54f54948401f753faa2c1 - Cache
+    librsvg/2.62.3#abe174fc0c191019ff73ee62792789f8 - Cache
+    libselinux/3.6#5a78ff6ae5034eeaac8da723361a8ce4 - Cache
+    libxft/2.3.9#dfc71e304b9d4c3dcf54a571281dbb86 - Cache
+    libxml2/2.15.3#3406c6d8d327e9b84c0c894feb859514 - Cache
+    lzo/2.10#f00b10acc508cea70645727d970a23e1 - Cache
+    pango/1.57.0#27e3f8ea574b5f7019614fc71c62a6fa - Cache
+    pcre2/10.42#9a35f5089feb875ec61a38eca364ce77 - Cache
+    pixman/0.43.4#60427f74e9514f007eb3cb8c52b6fbd6 - Cache
+    xorg/system#98f82cb669e4ebc6b4d9d8a4f3f1faf4 - Cache
+    xorg-macros/1.19.3#c3465b331ce1d044ee771dc5e4529b79 - Cache
+    xorg-proto/2024.1#449e77cf0df9acf515ddc79d0fe24938 - Cache
+    xz_utils/5.8.3#a8432fead347c69d8b2737c35f936132 - Cache
+    zlib/1.3.2#1cb806da49011867778ffb6ac7190fcb - Cache
+    zstd/1.5.7#b68ca8e3de04ba5957761751d1d661f4 - Cache
+Build requirements
+    autoconf/2.71#51077f068e61700d65bb05541ea1e4b0 - Cache
+    automake/1.16.5#b91b7c384c3deaa9d535be02da14d04f - Cache
+    bison/3.8.2#c3490cbe0078b6fd3eb4cf5ed64144dc - Cache
+    bzip2/1.0.8#c470882369c2d95c5c77e970c0c7e321 - Cache
+    cmake/4.3.2#5bae0b181463ca4dc3e924a981367ee6 - Cache
+    elfutils/0.190#8e8c47bd9b2578e29a0341b09b977be8 - Cache
+    flex/2.6.4#efa781fc5088b47c895bd4eef6911f2e - Cache
+    gettext/0.22.5#2f6edba611e8db1a8a18488b116e8c2a - Cache
+    glib/2.85.3#2fef4f1c3f92c9eaf077ccd54b9404a3 - Cache
+    gnu-config/cci.20210814#466e9d4d7779e1c142443f7ea44b4284 - Cache
+    gperf/3.1#a7afdf8f7cccdc2dcd4d962370c33d4f - Cache
+    libffi/3.4.8#a045c00fb26779635e3bed40e80c5254 - Cache
+    libiconv/1.17#9923bc6dc6f106646d6967e0039a5ada - Cache
+    libmount/2.39.2#64850679fa9d5ead878e5076b0cab2a8 - Cache
+    libselinux/3.6#5a78ff6ae5034eeaac8da723361a8ce4 - Cache
+    libtool/2.4.7#14e7739cc128bc1623d2ed318008e47e - Cache
+    m4/1.4.19#34c4bbc3eeebe98ca6edf2f52d602e7d - Cache
+    meson/1.10.2#9d2d10681fe7fe61c788c58626c89b25 - Cache
+    ninja/1.13.2#c8c5dc2a52ed6e4e42a66d75b4717ceb - Cache
+    pcre2/10.42#9a35f5089feb875ec61a38eca364ce77 - Cache
+    pkgconf/2.0.3#c7ba7fd1d7d22534ee070ae60ed79604 - Cache
+    pkgconf/2.2.0#4ac315b50ef734072b00ff3aacbf52bf - Cache
+    pkgconf/2.5.1#93c2051284cba1279494a43a4fcfeae2 - Cache
+    xorg-macros/1.19.3#c3465b331ce1d044ee771dc5e4529b79 - Cache
+    xorg-macros/1.20.0#b721d2f8ca6804d072820cb551d8c4fa - Cache
+    xz_utils/5.8.3#a8432fead347c69d8b2737c35f936132 - Cache
+    zlib/1.3.2#1cb806da49011867778ffb6ac7190fcb - Cache
+    zstd/1.5.7#b68ca8e3de04ba5957761751d1d661f4 - Cache
+Resolved version ranges
+    cairo/[>=1.18.0 <2]: cairo/1.18.4
+    cmake/[>=3.17]: cmake/4.3.2
+    cmake/[>=3.18]: cmake/4.3.2
+    expat/[>=2.6.2 <3]: expat/2.8.1
+    fontconfig/[>=2.15 <3]: fontconfig/2.17.1
+    freetype/[>=2.13.2 <3]: freetype/2.14.3
+    glib/[>=2.50.0 <3]: glib/2.85.3
+    harfbuzz/[>=2.0 <13]: harfbuzz/12.3.0
+    libffi/[>=3.4.4 <4]: libffi/3.4.8
+    libpng/[>=1.6 <2]: libpng/1.6.58
+    libxft/[~2.3]: libxft/2.3.9
+    libxml2/[>=2.9.0 <3]: libxml2/2.15.3
+    meson/[>=1.2.1 <2]: meson/1.10.2
+    meson/[>=1.2.2 <2]: meson/1.10.2
+    meson/[>=1.2.3 <2]: meson/1.10.2
+    meson/[>=1.3.2 <2]: meson/1.10.2
+    meson/[>=1.4.0 <2]: meson/1.10.2
+    ninja/[>=1.10.2 <2]: ninja/1.13.2
+    pango/[>=1.50.0 <2]: pango/1.57.0
+    pkgconf/[>=2.1.0 <3]: pkgconf/2.5.1
+    pkgconf/[>=2.1 <3]: pkgconf/2.5.1
+    pkgconf/[>=2.2 <3]: pkgconf/2.5.1
+    xz_utils/[>=5.4.5 <6]: xz_utils/5.8.3
+    zlib/[>=1.2.11 <2]: zlib/1.3.2
+    zstd/[~1.5]: zstd/1.5.7
+
+======== Computing necessary packages ========
+Connecting to remote 'conancenter' anonymously
+libselinux/3.6: WARN: risk: Transitive dependencies with 'headers=False' effect in 'package_id' is not necessary and suboptimal. Use required_conan_version='>=2.28' to activate it
+libselinux/3.6: WARN: risk: Transitive dependencies with 'headers=False' effect in 'package_id' is not necessary and suboptimal. Use required_conan_version='>=2.28' to activate it
+glib/2.85.3: WARN: risk: Transitive dependencies with 'headers=False' effect in 'package_id' is not necessary and suboptimal. Use required_conan_version='>=2.28' to activate it
+glib/2.85.3: WARN: risk: Transitive dependencies with 'headers=False' effect in 'package_id' is not necessary and suboptimal. Use required_conan_version='>=2.28' to activate it
+librsvg/2.62.3: Forced build from source
+Requirements
+    brotli/1.1.0#3f631ef77008f7b5eb388780116371a3:faa9bd32cf56f9aa4954248221dd8e002ffe8a59#cc56e8a1b54ea964927ef12c17855675 - Cache
+    bzip2/1.0.8#c470882369c2d95c5c77e970c0c7e321:c6aeb3e4cfcfdb1df8d54511fc295fb4d67cff32#875f0915659a544b58cb974309821ed7 - Cache
+    cairo/1.18.4#a3845ccec428be648572c84a65f74f15:3f98342632b61dde7c434d409b1dab1e6a2d8dd4#a0b2ae209871be8e40ccc2a80cf70011 - Cache
+    elfutils/0.190#8e8c47bd9b2578e29a0341b09b977be8:46bb5e69c4b4411657a68239054dccc32dd715d5#10a7addaae867beaa7efbc83cfe8ff15 - Cache
+    expat/2.8.1#e2fa0a1a12da326521a3d622a475047a:38828efa78ca779a2cdf04a35e92f76097c541e7#9e9b6869607aa662d5cfc60d63f82e07 - Cache
+    fontconfig/2.17.1#c7138aa09e0fcc0e337511719c9bfb12:b42020eefa86d45607056587034a7a6a03207edf#c471c69486cf77e655a7fddf35b3815b - Cache
+    freetype/2.14.3#4ee27b7918b546a96d7e6898e3a02b34:a91dddf32e7438a586534519f62126a14bef4a83#877eded893beb9161b05223e996f0612 - Cache
+    fribidi/1.0.13#205942bdceca0837df53e7ebb0aaa86a:ba8b9b9d18b13a9029ef391c4c3221e9ed8348c8#189860e0e2d751723cc33b0d180de3e8 - Cache
+    glib/2.85.3#2fef4f1c3f92c9eaf077ccd54b9404a3:ad367d86173f723c6fff13042f8f0a67aaf69481#e7ff90588e05790b4c2e1e8371b72571 - Cache
+    harfbuzz/12.3.0#a5fef061896cd5c30e9a17c9d7920ad1:0275a88bf8b040490427cbad1c6f936181f0084a#33e305c8574c526d71bb1d4d0e247965 - Cache
+    libffi/3.4.8#a045c00fb26779635e3bed40e80c5254:17561cbc2922b459119809d525458e11e7bcb047#8570586c0a317528f271fe8c727a85ca - Cache
+    libiconv/1.17#9923bc6dc6f106646d6967e0039a5ada:17561cbc2922b459119809d525458e11e7bcb047#4bcce544a14c473c1c52b623290fff8f - Cache
+    libmount/2.39.2#64850679fa9d5ead878e5076b0cab2a8:17561cbc2922b459119809d525458e11e7bcb047#08fd6b9a5d2e6f1fdef5d939f065fcfe - Cache
+    libpng/1.6.58#19cb72905ae54f54948401f753faa2c1:b899ac9b7f8d46c5a4de96dd6d79dfb3cd4d09c6#a3bfed1d746324acb9543764e6981670 - Cache
+    librsvg/2.62.3#abe174fc0c191019ff73ee62792789f8:3f4ffc0bff2f6386ca4b8530af80d3e10d4ff72b - Build
+    libselinux/3.6#5a78ff6ae5034eeaac8da723361a8ce4:6048c5014babe89d5d62ed0fa35b4be0c2e53eff#4e94c1a3ce4eeba34c2cba7125eb7aef - Cache
+    libxft/2.3.9#dfc71e304b9d4c3dcf54a571281dbb86:55e493dbb6d7c618b48e953b45375c74cf2dc0ca#20504ee382c01a675e4d9caca6b51841 - Cache
+    libxml2/2.15.3#3406c6d8d327e9b84c0c894feb859514:06cb4f8e5f847f0b6d0e4c524f9b45debeb168b2#268ba12d85ea7ce0ad2e75da2dd9644d - Cache
+    lzo/2.10#f00b10acc508cea70645727d970a23e1:17561cbc2922b459119809d525458e11e7bcb047#8316ef8cc7dff5739beb1fb3ca1ffeba - Cache
+    pango/1.57.0#27e3f8ea574b5f7019614fc71c62a6fa:2c17b83d5815b98afe7a248ef7216b1e1bba1e5c#a758147964123783a849feb5c8a15464 - Cache
+    pcre2/10.42#9a35f5089feb875ec61a38eca364ce77:ac52646359464e3ac281873705d7e052dd32df08#32ed6be013c0e52055d08b75dc517023 - Cache
+    pixman/0.43.4#60427f74e9514f007eb3cb8c52b6fbd6:17561cbc2922b459119809d525458e11e7bcb047#e5217ba3dd9bef3d59365b17c2e5be89 - Cache
+    xorg-macros/1.19.3#c3465b331ce1d044ee771dc5e4529b79:da39a3ee5e6b4b0d3255bfef95601890afd80709#f6477c9b9eaafe88df13906bad42fbb4 - Cache
+    xorg-proto/2024.1#449e77cf0df9acf515ddc79d0fe24938:da39a3ee5e6b4b0d3255bfef95601890afd80709#7d3e106e18f31f9ad023213d6b67b6da - Cache
+    xorg/system#98f82cb669e4ebc6b4d9d8a4f3f1faf4:da39a3ee5e6b4b0d3255bfef95601890afd80709#0ba8627bd47edc3a501e8f0eb9a79e5e - Cache
+    xz_utils/5.8.3#a8432fead347c69d8b2737c35f936132:39c446fe1440cbab4a1379ce79dd8f1d27c1a4ae#e19436044020c52d48291b0980d903ea - Cache
+    zlib/1.3.2#1cb806da49011867778ffb6ac7190fcb:17561cbc2922b459119809d525458e11e7bcb047#9ac897b63ed49b4efe0b3e23622840c8 - Cache
+    zstd/1.5.7#b68ca8e3de04ba5957761751d1d661f4:6ed7bd7d6abb8cd95a63c74849b05ffa08d203bf#3360cfe7ab82c472f074cef502e757dd - Cache
+Build requirements
+    meson/1.10.2#9d2d10681fe7fe61c788c58626c89b25:da39a3ee5e6b4b0d3255bfef95601890afd80709#f54fda458a6ea9fa57bcbb5f76c05bd7 - Cache
+    ninja/1.13.2#c8c5dc2a52ed6e4e42a66d75b4717ceb:3593751651824fb813502c69c971267624ced41a#156397ad110e0b3ae4f3018ae3b314c6 - Cache
+    pkgconf/2.5.1#93c2051284cba1279494a43a4fcfeae2:c0b621fd4b3199fe05075171573398833dba85f4#4b04c5ce32e745f87a67c63a747148d2 - Cache
+Skipped binaries
+    autoconf/2.71, automake/1.16.5, bison/3.8.2, bzip2/1.0.8, cmake/4.3.2, elfutils/0.190, flex/2.6.4, gettext/0.22.5, glib/2.85.3, gnu-config/cci.20210814, gperf/3.1, libffi/3.4.8, libiconv/1.17, libmount/2.39.2, libselinux/3.6, libtool/2.4.7, m4/1.4.19, pcre2/10.42, pkgconf/2.0.3, pkgconf/2.2.0, xorg-macros/1.19.3, xorg-macros/1.20.0, xz_utils/5.8.3, zlib/1.3.2, zstd/1.5.7
+xorg/system: System requirements: libx11-dev libx11-xcb-dev libfontenc-dev libice-dev libsm-dev libxau-dev libxaw7-dev libxcomposite-dev libxcursor-dev libxdamage-dev libxdmcp-dev libxext-dev libxfixes-dev libxi-dev libxinerama-dev libxkbfile-dev libxmu-dev libxmuu-dev libxpm-dev libxrandr-dev libxrender-dev libxres-dev libxss-dev libxt-dev libxtst-dev libxv-dev libxxf86vm-dev libxcb-glx0-dev libxcb-render0-dev libxcb-render-util0-dev libxcb-xkb-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-randr0-dev libxcb-shape0-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-xinerama0-dev libxcb-dri3-dev uuid-dev libxcb-cursor-dev libxcb-dri2-0-dev libxcb-dri3-dev libxcb-present-dev libxcb-composite0-dev libxcb-ewmh-dev libxcb-res0-dev already installed
+xorg/system: System requirements: libxcb-util-dev already installed
+
+======== Installing packages ========
+brotli/1.1.0: Already installed! (1 of 31)
+bzip2/1.0.8: Already installed! (2 of 31)
+libffi/3.4.8: Already installed! (3 of 31)
+libiconv/1.17: Already installed! (4 of 31)
+libmount/2.39.2: Already installed! (5 of 31)
+lzo/2.10: Already installed! (6 of 31)
+ninja/1.13.2: Already installed! (7 of 31)
+xorg/system: Already installed! (8 of 31)
+xz_utils/5.8.3: Already installed! (9 of 31)
+zlib/1.3.2: Already installed! (10 of 31)
+zstd/1.5.7: Already installed! (11 of 31)
+expat/2.8.1: Already installed! (12 of 31)
+fribidi/1.0.13: Already installed! (13 of 31)
+pixman/0.43.4: Already installed! (14 of 31)
+pkgconf/2.5.1: Already installed! (15 of 31)
+xorg-macros/1.19.3: Already installed! (16 of 31)
+xorg-macros/1.19.3: Appending AUTOMAKE_CONAN_INCLUDES environment variable: /home/uilian/.conan2/p/xorg-a7814e7f591fa/p/bin/share/aclocal
+xorg-macros/1.19.3: WARN: deprecated: The use of 'unix_path_legacy_compat' is deprecated in Conan 2.0 and does not perform path conversions. This is retained for compatibility with Conan 1.x and will be removed in a future version.
+libpng/1.6.58: Already installed! (17 of 31)
+libxml2/2.15.3: Already installed! (18 of 31)
+meson/1.10.2: Already installed! (19 of 31)
+pcre2/10.42: Already installed! (20 of 31)
+elfutils/0.190: Already installed! (21 of 31)
+elfutils/0.190: Appending PATH env var with : /home/uilian/.conan2/p/elfutab214d4443f10/p/bin
+elfutils/0.190: Setting ADDR2LINE to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-addr2line
+elfutils/0.190: Setting AR to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-ar
+elfutils/0.190: Setting ELFCLASSIFY to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-elfclassify
+elfutils/0.190: Setting ELFCMP to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-elfcmp
+elfutils/0.190: Setting ELFCOMPRESS to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-elfcompress
+elfutils/0.190: Setting ELFLINT to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-elflint
+elfutils/0.190: Setting FINDTEXTREL to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-findtextrel
+elfutils/0.190: Setting MAKE_DEBUG_ARCHIVE to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-make-debug-archive
+elfutils/0.190: Setting NM to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-nm
+elfutils/0.190: Setting OBJDUMP to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-objdump
+elfutils/0.190: Setting RANLIB to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-ranlib
+elfutils/0.190: Setting READELF to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-readelf
+elfutils/0.190: Setting SIZE to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-size
+elfutils/0.190: Setting STACK to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-stack
+elfutils/0.190: Setting STRINGS to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-strings
+elfutils/0.190: Setting STRIP to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-strip
+elfutils/0.190: Setting UNSTRIP to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-unstrip
+xorg-proto/2024.1: Already installed! (22 of 31)
+freetype/2.14.3: Already installed! (23 of 31)
+libselinux/3.6: Already installed! (24 of 31)
+fontconfig/2.17.1: Already installed! (25 of 31)
+glib/2.85.3: Already installed! (26 of 31)
+libxft/2.3.9: Already installed! (27 of 31)
+cairo/1.18.4: Already installed! (28 of 31)
+harfbuzz/12.3.0: Already installed! (29 of 31)
+pango/1.57.0: Already installed! (30 of 31)
+librsvg/2.62.3: Calling source() in /home/uilian/.conan2/p/librs3269a33760199/s/src
+librsvg/2.62.3: Source https://gitlab.gnome.org/GNOME/librsvg/-/archive/2.62.3/librsvg-2.62.3.tar.gz retrieved from local download cache
+librsvg/2.62.3: Uncompressing librsvg-2.62.3.tar.gz to .
+
+-------- Installing package librsvg/2.62.3 (31 of 31) --------
+librsvg/2.62.3: Building from source
+librsvg/2.62.3: Package librsvg/2.62.3:3f4ffc0bff2f6386ca4b8530af80d3e10d4ff72b
+librsvg/2.62.3: settings: os=Linux arch=x86_64 compiler=gcc compiler.version=13 build_type=Release
+librsvg/2.62.3: options: shared=True
+librsvg/2.62.3: requires: pango/1.57.Z xorg-macros/1.19.3#c3465b331ce1d044ee771dc5e4529b79:da39a3ee5e6b4b0d3255bfef95601890afd80709 cairo/1.18.Z fontconfig/2.17.Z expat/2.8.Z xorg/system harfbuzz/12.3.Z freetype/2.14.Z libpng/1.6.Z glib/2.85.Z libxml2/2.15.Z zlib/1.3.Z
+librsvg/2.62.3: Copying sources to build folder
+librsvg/2.62.3: Building your package in /home/uilian/.conan2/p/b/librs80db293bcfa07/b
+librsvg/2.62.3: Calling generate()
+librsvg/2.62.3: Generators folder: /home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release/conan
+librsvg/2.62.3: WARN: Building librsvg requires rustc, cargo and cargo-c installed in your system.
+librsvg/2.62.3: MesonToolchain generated: conan_meson_native.ini
+librsvg/2.62.3: Generating aggregated env files
+librsvg/2.62.3: Generated aggregated env files: ['conanbuild.sh', 'conanrun.sh']
+librsvg/2.62.3: Calling build()
+librsvg/2.62.3: Meson configure cmd: meson setup --native-file "/home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release/conan/conan_meson_native.ini" "/home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release" "/home/uilian/.conan2/p/b/librs80db293bcfa07/b/src" --prefix=/
+librsvg/2.62.3: RUN: meson setup --native-file "/home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release/conan/conan_meson_native.ini" "/home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release" "/home/uilian/.conan2/p/b/librs80db293bcfa07/b/src" --prefix=/
+The Meson build system
+Version: 1.10.2
+Source dir: /home/uilian/.conan2/p/b/librs80db293bcfa07/b/src
+Build dir: /home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release
+Build type: native build
+Project name: librsvg
+Project version: 2.62.3
+C compiler for the host machine: /usr/bin/gcc-13 (gcc 13.1.0 "gcc-13 (Ubuntu 13.1.0-8ubuntu1~22.04) 13.1.0")
+C linker for the host machine: /usr/bin/gcc-13 ld.bfd 2.38
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Program cargo found: YES 1.96.0 1.96.0 (/home/uilian/.cargo/bin/cargo)
+Program meson/cargo_wrapper.py found: YES (/home/uilian/.conan2/p/b/librs80db293bcfa07/b/src/meson/cargo_wrapper.py)
+Program cargo-cbuild found: YES 0.10.23 0.10.23 (/home/uilian/.cargo/bin/cargo-cbuild)
+Program rustc found: YES 1.96.0 1.96.0 (/home/uilian/.cargo/bin/rustc)
+Program meson/makedef.py found: YES (/home/uilian/.conan2/p/b/librs80db293bcfa07/b/src/meson/makedef.py)
+Program python3 found: YES (/opt/pyenv/versions/3.12.4/bin/python3)
+Found pkg-config: YES (/home/uilian/.conan2/p/pkgcoa6060d80b51cc/p/bin/pkgconf) 2.5.1
+Run-time dependency cairo found: YES 1.18.4
+Run-time dependency cairo-gobject found: YES 1.18.4
+Run-time dependency cairo-png found: YES 1.18.4
+Run-time dependency dav1d found: NO (tried pkgconfig)
+Run-time dependency freetype2 found: YES 26.6.20
+Found CMake: /opt/pyenv/versions/3.12.4/bin/cmake (4.3.1)
+Run-time dependency gdk-pixbuf-2.0 found: NO (tried pkgconfig and cmake)
+Not looking for a fallback subproject for the dependency gdk-pixbuf-2.0 because:
+Use of fallback dependencies is disabled.
+Run-time dependency gio-2.0 found: YES 2.85.3
+Run-time dependency glib-2.0 found: YES 2.85.3
+Run-time dependency harfbuzz found: YES 12.3.0
+Run-time dependency libxml-2.0 found: YES 2.15.3
+Run-time dependency pango found: YES 1.57.0
+Run-time dependency pangocairo found: YES 1.57.0
+Run-time dependency pangoft2 found: YES 1.57.0
+Run-time dependency gmodule-2.0 found: YES 2.85.3
+Program rst2man rst2man.py skipped: feature docs disabled
+Program gi-docgen found: NO
+Dependency gobject-introspection-1.0 skipped: feature introspection disabled
+Run-time dependency vapigen found: NO (tried pkgconfig and cmake)
+Run-time dependency appleframeworks found: NO (tried framework)
+Library m found: YES
+Fetching value of define "_MSC_VER" : (undefined) 
+Program meson/query-rustc.py found: YES (/home/uilian/.conan2/p/b/librs80db293bcfa07/b/src/meson/query-rustc.py)
+Library dl found: YES
+Library rt found: YES
+Library m found: YES
+Library pthread found: YES
+Library util found: YES
+Library c found: YES
+Library gcc_s found: YES
+Program pkg-config found: YES
+Checking if define "__MINGW32__" exists: NO 
+Configuring rsvg-features.h using configuration
+Configuring rsvg-version.h using configuration
+Program llvm-nm found: NO
+Program nm found: YES (/usr/bin/nm)
+Configuring librsvg-2.0.def with command
+Compiler for C supports link arguments -Wl,-dead_strip: NO 
+Compiler for C supports link arguments -Wl,--gc-sections: YES 
+Compiler for C supports link arguments -Wl,-Bsymbolic-functions: YES 
+Compiler for C supports function attribute unused: YES 
+Configuring _rsvg_dummy.c with command
+Found pkg-config: YES (/home/uilian/.conan2/p/pkgcoa6060d80b51cc/p/bin/pkgconf) 2.5.1
+Build targets in project: 3
+
+librsvg 2.62.3
+
+  User defined options
+    Native files: /home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release/conan/conan_meson_native.ini
+    prefix      : /
+
+Found ninja-1.13.2 at /home/uilian/.conan2/p/b/ninjab48f310494444/p/bin/ninja
+Generating targets:   0%|          | 0/3 eta ?                                              Writing build.ninja:   0%|          | 0/34 eta ?                                                
+librsvg/2.62.3: Meson build cmd: meson compile -C "/home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release" -j12 --verbose
+librsvg/2.62.3: RUN: meson compile -C "/home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release" -j12 --verbose
+[0/4] /opt/pyenv/versions/3.12.4/bin/python3 /home/uilian/.conan2/p/meson5f17c5ad1b4cc/f/bin/meson.py --internal exe --unpickle /home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release/meson-private/meson_exe_cargo_wrapper.py_0bb7ccc01bac35001e9a34a69cf2f52671b7e696.dat
+   Compiling proc-macro2 v1.0.106
+   Compiling unicode-ident v1.0.22
+   Compiling quote v1.0.44
+   Compiling target-lexicon v0.13.3
+   Compiling winnow v0.7.14
+   Compiling heck v0.5.0
+   Compiling serde_spanned v1.0.4
+   Compiling smallvec v1.15.1
+   Compiling toml_datetime v0.7.5+spec-1.1.0
+   Compiling pkg-config v0.3.32
+   Compiling version-compare v0.2.1
+   Compiling libc v0.2.180
+   Compiling siphasher v1.0.2
+   Compiling autocfg v1.5.0
+   Compiling rand_core v0.6.4
+   Compiling stable_deref_trait v1.2.1
+   Compiling cfg-if v1.0.4
+   Compiling phf_shared v0.11.3
+   Compiling memchr v2.8.0
+   Compiling rand v0.8.6
+   Compiling new_debug_unreachable v1.0.6
+   Compiling parking_lot_core v0.9.12
+   Compiling serde_core v1.0.228
+   Compiling futures-core v0.3.32
+   Compiling bitflags v2.10.0
+   Compiling num-traits v0.2.19
+   Compiling writeable v0.6.2
+   Compiling scopeguard v1.2.0
+   Compiling serde v1.0.228
+   Compiling futures-task v0.3.32
+   Compiling cfg-expr v0.20.6
+   Compiling litemap v0.8.1
+   Compiling slab v0.4.11
+   Compiling phf_generator v0.11.3
+   Compiling pin-project-lite v0.2.16
+   Compiling syn v2.0.114
+   Compiling phf_codegen v0.11.3
+   Compiling lock_api v0.4.14
+   Compiling bytemuck v1.24.0
+   Compiling icu_normalizer_data v2.1.1
+   Compiling precomputed-hash v0.1.1
+   Compiling icu_properties_data v2.1.2
+   Compiling crossbeam-utils v0.8.21
+   Compiling string_cache_codegen v0.5.4
+   Compiling futures-channel v0.3.31
+   Compiling simd-adler32 v0.3.8
+   Compiling crc32fast v1.5.0
+   Compiling adler2 v2.0.1
+   Compiling dtoa v1.0.11
+   Compiling mac v0.1.1
+   Compiling parking_lot v0.12.5
+   Compiling web_atoms v0.1.3
+   Compiling paste v1.0.15
+   Compiling dtoa-short v0.3.5
+   Compiling toml_parser v1.0.6+spec-1.1.0
+   Compiling futf v0.1.5
+   Compiling miniz_oxide v0.8.9
+   Compiling safe_arch v0.7.4
+   Compiling aho-corasick v1.1.4
+   Compiling matrixmultiply v0.3.10
+   Compiling crossbeam-epoch v0.9.18
+   Compiling toml v0.9.11+spec-1.1.0
+   Compiling regex-syntax v0.8.8
+   Compiling rayon-core v1.13.0
+   Compiling typenum v1.19.0
+   Compiling system-deps v7.0.7
+   Compiling log v0.4.29
+   Compiling futures-io v0.3.31
+   Compiling utf-8 v0.7.6
+   Compiling itoa v1.0.17
+   Compiling tendril v0.4.3
+   Compiling crossbeam-deque v0.8.6
+   Compiling flate2 v1.1.8
+   Compiling wide v0.7.33
+   Compiling num-complex v0.4.6
+   Compiling approx v0.5.1
+   Compiling glib-sys v0.22.0
+   Compiling gobject-sys v0.22.0
+   Compiling gio-sys v0.22.0
+   Compiling pango-sys v0.22.0
+   Compiling cairo-sys-rs v0.22.0
+   Compiling pangocairo-sys v0.22.0
+   Compiling num-integer v0.1.46
+   Compiling pxfm v0.1.27
+   Compiling fdeflate v0.3.7
+   Compiling string_cache v0.8.9
+   Compiling synstructure v0.13.2
+   Compiling regex-automata v0.4.13
+   Compiling selectors v0.31.0
+   Compiling either v1.15.0
+   Compiling color_quant v1.1.0
+   Compiling percent-encoding v2.3.2
+   Compiling weezl v0.1.12
+   Compiling quick-error v2.0.1
+   Compiling utf8_iter v1.0.4
+   Compiling byteorder-lite v0.1.0
+   Compiling zune-core v0.5.1
+   Compiling byteorder v1.5.0
+   Compiling rawpointer v0.2.1
+   Compiling zune-jpeg v0.5.13
+   Compiling fxhash v0.2.1
+   Compiling image-webp v0.2.4
+   Compiling gif v0.14.1
+   Compiling zerofrom-derive v0.1.6
+   Compiling yoke-derive v0.8.1
+   Compiling zerofrom v0.1.6
+   Compiling zerovec-derive v0.11.2
+   Compiling yoke v0.8.1
+   Compiling displaydoc v0.2.5
+   Compiling futures-macro v0.3.32
+   Compiling phf_macros v0.11.3
+   Compiling glib-macros v0.22.0
+   Compiling cssparser-macros v0.6.1
+   Compiling derive_more-impl v2.1.1
+   Compiling zerotrie v0.2.3
+   Compiling phf v0.11.3
+   Compiling futures-util v0.3.32
+   Compiling cssparser v0.35.0
+   Compiling zerovec v0.11.5
+   Compiling regex v1.12.2
+   Compiling tinystr v0.8.2
+   Compiling potential_utf v0.1.4
+   Compiling icu_locale_core v2.1.1
+   Compiling icu_collections v2.1.1
+   Compiling derive_more v2.1.1
+   Compiling markup5ever v0.35.0
+   Compiling moxcms v0.8.1
+   Compiling nalgebra-macros v0.3.0
+   Compiling form_urlencoded v1.2.2
+   Compiling simba v0.9.1
+   Compiling icu_provider v2.1.1
+   Compiling png v0.18.1
+   Compiling num-rational v0.4.2
+   Compiling futures-executor v0.3.31
+   Compiling icu_properties v2.1.2
+   Compiling icu_normalizer v2.1.1
+   Compiling librsvg v2.62.3 (/home/uilian/.conan2/p/b/librs80db293bcfa07/b/src/rsvg)
+   Compiling idna_adapter v1.2.1
+   Compiling glib v0.22.0
+   Compiling idna v1.1.0
+   Compiling phf_shared v0.13.1
+   Compiling servo_arc v0.4.3
+   Compiling tinyvec_macros v0.1.1
+   Compiling lazy_static v1.5.0
+   Compiling tinyvec v1.10.0
+   Compiling string_cache v0.9.0
+   Compiling locale_config v0.3.0
+   Compiling url v2.5.8
+   Compiling rayon v1.11.0
+   Compiling image v0.25.10
+   Compiling xml5ever v0.35.0
+   Compiling librsvg-c v2.62.3 (/home/uilian/.conan2/p/b/librs80db293bcfa07/b/src/librsvg-c)
+   Compiling cssparser-color v0.3.0
+   Compiling nalgebra v0.34.1
+   Compiling itertools v0.14.0
+   Compiling float-cmp v0.10.0
+   Compiling rgb v0.8.52
+   Compiling encoding_rs v0.8.35
+   Compiling rctree v0.6.0
+   Compiling mutants v0.0.3
+   Compiling data-url v0.3.2
+   Compiling cast v0.3.0
+   Compiling language-tags v0.3.2
+   Compiling gio v0.22.1
+   Compiling cairo-rs v0.22.0
+   Compiling pango v0.22.0
+   Compiling pangocairo v0.22.0
+note: link against the following native artifacts when linking against this static library. The order and any duplication can be significant on some platforms
+
+    Finished `release` profile [optimized] target(s) in 35.09s
+    Building pkg-config files
+command: ['/home/uilian/.cargo/bin/cargo', 'cbuild', '--locked', '--prefix', '/', '--libdir', '/lib', '--library-type', 'staticlib', '--manifest-path', '/home/uilian/.conan2/p/b/librs80db293bcfa07/b/src/Cargo.toml', '--target-dir', '/home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release/target', '--release', '-p', 'librsvg-c'], env: {'CARGO_PROFILE_RELEASE_OPT_LEVEL': '3'}
+[1/4] /usr/bin/gcc-13 -Irsvg/librsvg-2.so.2.62.3.p -Irsvg -I../src/rsvg -Iinclude -I../src/include -I/home/uilian/.conan2/p/glibf5cc7ccee5cfd/p/include -I/home/uilian/.conan2/p/glibf5cc7ccee5cfd/p/include/glib-2.0 -I/home/uilian/.conan2/p/glibf5cc7ccee5cfd/p/lib/glib-2.0/include -I/home/uilian/.conan2/p/pcre256bb025014eef/p/include -I/home/uilian/.conan2/p/zlib1b2a47904a59e/p/include -I/home/uilian/.conan2/p/bzip2fb3260e7b2ab3/p/include -I/home/uilian/.conan2/p/libff8a671ff2f8cf6/p/include -I/home/uilian/.conan2/p/libmo1a45c23bdde07/p/include -I/home/uilian/.conan2/p/libmo1a45c23bdde07/p/include/libmount -I/home/uilian/.conan2/p/libse3fdbfafa19363/p/include -I/home/uilian/.conan2/p/cairoee35b70223e53/p/include/cairo -I/home/uilian/.conan2/p/cairoee35b70223e53/p/include -I/home/uilian/.conan2/p/lzo2bea6105b1d70/p/include -I/home/uilian/.conan2/p/lzo2bea6105b1d70/p/include/lzo -I/home/uilian/.conan2/p/fontc061820cc7cd2b/p/include -I/home/uilian/.conan2/p/expata4dcad4ae710f/p/include -I/home/uilian/.conan2/p/pixma2d559370e5b62/p/include -I/home/uilian/.conan2/p/pixma2d559370e5b62/p/include/pixman-1 -I/home/uilian/.conan2/p/freetc50f364f37f09/p/include -I/home/uilian/.conan2/p/freetc50f364f37f09/p/include/freetype2 -I/home/uilian/.conan2/p/libpn3113c2b2996ac/p/include -I/home/uilian/.conan2/p/brotl4f1743d324bc8/p/include -I/home/uilian/.conan2/p/harfb366866eafc5c5/p/include -I/home/uilian/.conan2/p/harfb366866eafc5c5/p/include/harfbuzz -I/home/uilian/.conan2/p/elfutab214d4443f10/p/include -I/home/uilian/.conan2/p/xz_utc54e905cffd61/p/include -I/home/uilian/.conan2/p/zstdfe637538bff92/p/include -I/home/uilian/.conan2/p/glibf5cc7ccee5cfd/p/include/gio-unix-2.0 -I/home/uilian/.conan2/p/libxm4c393a633191b/p/include -I/home/uilian/.conan2/p/libxm4c393a633191b/p/include/libxml2 -I/home/uilian/.conan2/p/libic33aa452e6906e/p/include -I/home/uilian/.conan2/p/b/pango7fc6d4b0f1e68/p/include/pango-1.0 -I/home/uilian/.conan2/p/fribi337451ee74631/p/include -I/home/uilian/.conan2/p/fribi337451ee74631/p/include/fribidi -I/home/uilian/.conan2/p/libxf910e3a976c60f/p/include -I/home/uilian/.conan2/p/xorg-cf70c104cb418/p/include -I/home/uilian/.conan2/p/xorg-cf70c104cb418/p/include/X11 -fdiagnostics-color=always -DNDEBUG -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -O3 -m64 -fPIC -pthread -MD -MQ rsvg/librsvg-2.so.2.62.3.p/meson-generated_..__rsvg_dummy.c.o -MF rsvg/librsvg-2.so.2.62.3.p/meson-generated_..__rsvg_dummy.c.o.d -o rsvg/librsvg-2.so.2.62.3.p/meson-generated_..__rsvg_dummy.c.o -c rsvg/_rsvg_dummy.c
+[3/4] /opt/pyenv/versions/3.12.4/bin/python3 /home/uilian/.conan2/p/meson5f17c5ad1b4cc/f/bin/meson.py --internal exe --capture rsvg/librsvg-2.0.ver -- /home/uilian/.conan2/p/b/librs80db293bcfa07/b/src/meson/makedef.py --regex '^rsvg_.' --os linux --prefix '' --nm /usr/bin/nm rsvg/librsvg_2.a
+[4/4] /usr/bin/gcc-13  -o rsvg/librsvg-2.so.2.62.3 rsvg/librsvg-2.so.2.62.3.p/meson-generated_..__rsvg_dummy.c.o -Wl,--as-needed -Wl,--no-undefined -Wl,-O1 -shared -fPIC -Wl,-soname,librsvg-2.so.2 -Wl,--whole-archive -Wl,--start-group rsvg/librsvg_2.a -Wl,--no-whole-archive -m64 -Wl,-rpath,/home/uilian/.conan2/p/glibf5cc7ccee5cfd/p/lib:/home/uilian/.conan2/p/pcre256bb025014eef/p/lib:/home/uilian/.conan2/p/zlib1b2a47904a59e/p/lib:/home/uilian/.conan2/p/bzip2fb3260e7b2ab3/p/lib:/home/uilian/.conan2/p/libff8a671ff2f8cf6/p/lib:/home/uilian/.conan2/p/libmo1a45c23bdde07/p/lib:/home/uilian/.conan2/p/libse3fdbfafa19363/p/lib:/home/uilian/.conan2/p/cairoee35b70223e53/p/lib:/home/uilian/.conan2/p/lzo2bea6105b1d70/p/lib:/home/uilian/.conan2/p/fontc061820cc7cd2b/p/lib:/home/uilian/.conan2/p/expata4dcad4ae710f/p/lib:/home/uilian/.conan2/p/pixma2d559370e5b62/p/lib:/home/uilian/.conan2/p/freetc50f364f37f09/p/lib:/home/uilian/.conan2/p/libpn3113c2b2996ac/p/lib:/home/uilian/.conan2/p/brotl4f1743d324bc8/p/lib:/home/uilian/.conan2/p/harfb366866eafc5c5/p/lib:/home/uilian/.conan2/p/elfutab214d4443f10/p/lib:/home/uilian/.conan2/p/xz_utc54e905cffd61/p/lib:/home/uilian/.conan2/p/zstdfe637538bff92/p/lib:/home/uilian/.conan2/p/libxm4c393a633191b/p/lib:/home/uilian/.conan2/p/libic33aa452e6906e/p/lib:/home/uilian/.conan2/p/b/pango7fc6d4b0f1e68/p/lib:/home/uilian/.conan2/p/fribi337451ee74631/p/lib:/home/uilian/.conan2/p/libxf910e3a976c60f/p/lib -Wl,--gc-sections -Wl,-Bsymbolic-functions -Wl,--version-script,/home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release/rsvg/librsvg-2.0.def /home/uilian/.conan2/p/glibf5cc7ccee5cfd/p/lib/libglib-2.0.so -lpthread /home/uilian/.conan2/p/pcre256bb025014eef/p/lib/libpcre2-16.so /home/uilian/.conan2/p/pcre256bb025014eef/p/lib/libpcre2-32.so /home/uilian/.conan2/p/pcre256bb025014eef/p/lib/libpcre2-posix.so /home/uilian/.conan2/p/pcre256bb025014eef/p/lib/libpcre2-8.so /home/uilian/.conan2/p/zlib1b2a47904a59e/p/lib/libz.so /home/uilian/.conan2/p/bzip2fb3260e7b2ab3/p/lib/libbz2.so /home/uilian/.conan2/p/glibf5cc7ccee5cfd/p/lib/libgio-2.0.so /usr/lib/x86_64-linux-gnu/libresolv.so /home/uilian/.conan2/p/glibf5cc7ccee5cfd/p/lib/libgobject-2.0.so /home/uilian/.conan2/p/libff8a671ff2f8cf6/p/lib/libffi.so -Wl,--export-dynamic /home/uilian/.conan2/p/glibf5cc7ccee5cfd/p/lib/libgmodule-2.0.so /home/uilian/.conan2/p/libmo1a45c23bdde07/p/lib/libmount.so -lrt /home/uilian/.conan2/p/libmo1a45c23bdde07/p/lib/libblkid.so /home/uilian/.conan2/p/libse3fdbfafa19363/p/lib/libselinux.so -ldl /home/uilian/.conan2/p/libse3fdbfafa19363/p/lib/libsepol.so /home/uilian/.conan2/p/cairoee35b70223e53/p/lib/libcairo.so /home/uilian/.conan2/p/lzo2bea6105b1d70/p/lib/liblzo2.so /usr/lib/x86_64-linux-gnu/libxcb-shm.so /usr/lib/x86_64-linux-gnu/libxcb-render.so /usr/lib/x86_64-linux-gnu/libX11-xcb.so /usr/lib/x86_64-linux-gnu/libXrender.so /home/uilian/.conan2/p/fontc061820cc7cd2b/p/lib/libfontconfig.so /home/uilian/.conan2/p/expata4dcad4ae710f/p/lib/libexpat.so /usr/lib/x86_64-linux-gnu/libXext.so /home/uilian/.conan2/p/pixma2d559370e5b62/p/lib/libpixman-1.so /usr/lib/x86_64-linux-gnu/libX11.so /usr/lib/x86_64-linux-gnu/libxcb.so /home/uilian/.conan2/p/freetc50f364f37f09/p/lib/libfreetype.so /home/uilian/.conan2/p/libpn3113c2b2996ac/p/lib/libpng.so /home/uilian/.conan2/p/brotl4f1743d324bc8/p/lib/libbrotlidec.so /home/uilian/.conan2/p/brotl4f1743d324bc8/p/lib/libbrotlienc.so -lm /home/uilian/.conan2/p/brotl4f1743d324bc8/p/lib/libbrotlicommon.so -lutil -lc -lgcc_s /home/uilian/.conan2/p/cairoee35b70223e53/p/lib/libcairo-gobject.so /home/uilian/.conan2/p/harfb366866eafc5c5/p/lib/libharfbuzz-subset.so /home/uilian/.conan2/p/harfb366866eafc5c5/p/lib/libharfbuzz-gobject.so /home/uilian/.conan2/p/harfb366866eafc5c5/p/lib/libharfbuzz.so /home/uilian/.conan2/p/elfutab214d4443f10/p/lib/libelf.so /home/uilian/.conan2/p/xz_utc54e905cffd61/p/lib/liblzma.so /home/uilian/.conan2/p/zstdfe637538bff92/p/lib/libzstd.so /home/uilian/.conan2/p/glibf5cc7ccee5cfd/p/lib/libgthread-2.0.so /home/uilian/.conan2/p/libxm4c393a633191b/p/lib/libxml2.so /home/uilian/.conan2/p/libic33aa452e6906e/p/lib/libiconv.so /home/uilian/.conan2/p/libic33aa452e6906e/p/lib/libcharset.so /home/uilian/.conan2/p/b/pango7fc6d4b0f1e68/p/lib/libpangocairo-1.0.so /home/uilian/.conan2/p/b/pango7fc6d4b0f1e68/p/lib/libpangoft2-1.0.so /home/uilian/.conan2/p/b/pango7fc6d4b0f1e68/p/lib/libpango-1.0.so /home/uilian/.conan2/p/fribi337451ee74631/p/lib/libfribidi.so /home/uilian/.conan2/p/libxf910e3a976c60f/p/lib/libXft.so /usr/lib/x86_64-linux-gnu/libfontenc.so /usr/lib/x86_64-linux-gnu/libICE.so /usr/lib/x86_64-linux-gnu/libXau.so /usr/lib/x86_64-linux-gnu/libXaw7.so /usr/lib/x86_64-linux-gnu/libXcomposite.so /usr/lib/x86_64-linux-gnu/libXcursor.so /usr/lib/x86_64-linux-gnu/libXdamage.so /usr/lib/x86_64-linux-gnu/libXdmcp.so /usr/lib/x86_64-linux-gnu/libXfixes.so /usr/lib/x86_64-linux-gnu/libXi.so /usr/lib/x86_64-linux-gnu/libXinerama.so /usr/lib/x86_64-linux-gnu/libxkbfile.so /usr/lib/x86_64-linux-gnu/libXmu.so /usr/lib/x86_64-linux-gnu/libXmuu.so /usr/lib/x86_64-linux-gnu/libXpm.so /usr/lib/x86_64-linux-gnu/libXrandr.so /usr/lib/x86_64-linux-gnu/libXRes.so /usr/lib/x86_64-linux-gnu/libXss.so /usr/lib/x86_64-linux-gnu/libXt.so /usr/lib/x86_64-linux-gnu/libXtst.so /usr/lib/x86_64-linux-gnu/libXv.so /usr/lib/x86_64-linux-gnu/libXxf86vm.so /usr/lib/x86_64-linux-gnu/libxcb-xkb.so /usr/lib/x86_64-linux-gnu/libxcb-icccm.so /usr/lib/x86_64-linux-gnu/libxcb-image.so /usr/lib/x86_64-linux-gnu/libxcb-keysyms.so /usr/lib/x86_64-linux-gnu/libxcb-randr.so /usr/lib/x86_64-linux-gnu/libxcb-render-util.so /usr/lib/x86_64-linux-gnu/libxcb-shape.so /usr/lib/x86_64-linux-gnu/libxcb-sync.so /usr/lib/x86_64-linux-gnu/libxcb-xfixes.so /usr/lib/x86_64-linux-gnu/libxcb-xinerama.so /usr/lib/x86_64-linux-gnu/libxcb-util.so /usr/lib/x86_64-linux-gnu/libxcb-dri3.so /usr/lib/x86_64-linux-gnu/libxcb-cursor.so /usr/lib/x86_64-linux-gnu/libxcb-dri2.so /usr/lib/x86_64-linux-gnu/libxcb-glx.so /usr/lib/x86_64-linux-gnu/libxcb-present.so /usr/lib/x86_64-linux-gnu/libxcb-composite.so /usr/lib/x86_64-linux-gnu/libxcb-ewmh.so /usr/lib/x86_64-linux-gnu/libxcb-res.so /usr/lib/x86_64-linux-gnu/libSM.so /usr/lib/x86_64-linux-gnu/libuuid.so -Wl,--end-group
+INFO: autodetecting backend as ninja
+INFO: calculating backend command to run: /home/uilian/.conan2/p/b/ninjab48f310494444/p/bin/ninja -j 12 -v
+
+librsvg/2.62.3: Package '3f4ffc0bff2f6386ca4b8530af80d3e10d4ff72b' built
+librsvg/2.62.3: Build folder /home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release
+librsvg/2.62.3: Generating the package
+librsvg/2.62.3: Packaging in folder /home/uilian/.conan2/p/b/librs80db293bcfa07/p
+librsvg/2.62.3: Calling package()
+librsvg/2.62.3: RUN: meson install -C "/home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release" --destdir "/home/uilian/.conan2/p/b/librs80db293bcfa07/p"
+ninja: Entering directory `/home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release'
+ninja: no work to do.
+Installing rsvg/librsvg-2.so.2.62.3 to /home/uilian/.conan2/p/b/librs80db293bcfa07/p/lib
+Installing /home/uilian/.conan2/p/b/librs80db293bcfa07/b/src/include/librsvg/rsvg.h to /home/uilian/.conan2/p/b/librs80db293bcfa07/p/include/librsvg-2.0/librsvg
+Installing /home/uilian/.conan2/p/b/librs80db293bcfa07/b/src/include/librsvg/rsvg-cairo.h to /home/uilian/.conan2/p/b/librs80db293bcfa07/p/include/librsvg-2.0/librsvg
+Installing /home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release/include/librsvg/rsvg-features.h to /home/uilian/.conan2/p/b/librs80db293bcfa07/p/include/librsvg-2.0/librsvg
+Installing /home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release/include/librsvg/rsvg-version.h to /home/uilian/.conan2/p/b/librs80db293bcfa07/p/include/librsvg-2.0/librsvg
+Installing /home/uilian/.conan2/p/b/librs80db293bcfa07/b/build-release/meson-private/librsvg-2.0.pc to /home/uilian/.conan2/p/b/librs80db293bcfa07/p/lib/pkgconfig
+Installing symlink pointing to librsvg-2.so.2.62.3 to /home/uilian/.conan2/p/b/librs80db293bcfa07/p/lib/librsvg-2.so.2
+Installing symlink pointing to librsvg-2.so.2 to /home/uilian/.conan2/p/b/librs80db293bcfa07/p/lib/librsvg-2.so
+
+librsvg/2.62.3: [HOOK - hook_validate_env.py] post_package(): Running hook: /home/uilian/.conan2/extensions/hooks/hook_validate_env.py
+librsvg/2.62.3: package(): Packaged 1 '.LIB' file: COPYING.LIB
+librsvg/2.62.3: package(): Packaged 1 '.2' file: librsvg-2.so.2
+librsvg/2.62.3: package(): Packaged 1 '.so' file: librsvg-2.so
+librsvg/2.62.3: package(): Packaged 1 '.3' file: librsvg-2.so.2.62.3
+librsvg/2.62.3: package(): Packaged 4 '.h' files: rsvg-cairo.h, rsvg.h, rsvg-version.h, rsvg-features.h
+librsvg/2.62.3: Created package revision e31678897fbc3f07ccd7410a5ad119b1
+librsvg/2.62.3: Package '3f4ffc0bff2f6386ca4b8530af80d3e10d4ff72b' created
+librsvg/2.62.3: Full package reference: librsvg/2.62.3#abe174fc0c191019ff73ee62792789f8:3f4ffc0bff2f6386ca4b8530af80d3e10d4ff72b#e31678897fbc3f07ccd7410a5ad119b1
+librsvg/2.62.3: Package folder /home/uilian/.conan2/p/b/librs80db293bcfa07/p
+WARN: deprecated: Usage of deprecated Conan 1.X features that will be removed in Conan 2.X:
+WARN: deprecated:     'cpp_info.names' used in: xorg-macros/1.19.3, bzip2/1.0.8
+WARN: deprecated:     'cpp_info.build_modules' used in: bzip2/1.0.8
+WARN: deprecated:     'env_info' used in: glib/2.85.3, xorg-macros/1.19.3, bzip2/1.0.8, elfutils/0.190
+WARN: deprecated:     'cpp_info.filenames' used in: xorg-proto/2024.1
+
+======== Launching test_package ========
+
+======== Computing dependency graph ========
+elfutils/0.190: WARN: deprecated: build_requires is deprecated, prefer to use tool_requires with correct traits
+elfutils/0.190: WARN: deprecated: build_requires is deprecated, prefer to use tool_requires with correct traits
+elfutils/0.190: WARN: deprecated: build_requires is deprecated, prefer to use tool_requires with correct traits
+Graph root
+    librsvg/2.62.3 (test package): /home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/test_package/conanfile.py
+Requirements
+    brotli/1.1.0#3f631ef77008f7b5eb388780116371a3 - Cache
+    bzip2/1.0.8#c470882369c2d95c5c77e970c0c7e321 - Cache
+    cairo/1.18.4#a3845ccec428be648572c84a65f74f15 - Cache
+    elfutils/0.190#8e8c47bd9b2578e29a0341b09b977be8 - Cache
+    expat/2.8.1#e2fa0a1a12da326521a3d622a475047a - Cache
+    fontconfig/2.17.1#c7138aa09e0fcc0e337511719c9bfb12 - Cache
+    freetype/2.14.3#4ee27b7918b546a96d7e6898e3a02b34 - Cache
+    fribidi/1.0.13#205942bdceca0837df53e7ebb0aaa86a - Cache
+    glib/2.85.3#2fef4f1c3f92c9eaf077ccd54b9404a3 - Cache
+    harfbuzz/12.3.0#a5fef061896cd5c30e9a17c9d7920ad1 - Cache
+    libffi/3.4.8#a045c00fb26779635e3bed40e80c5254 - Cache
+    libiconv/1.17#9923bc6dc6f106646d6967e0039a5ada - Cache
+    libmount/2.39.2#64850679fa9d5ead878e5076b0cab2a8 - Cache
+    libpng/1.6.58#19cb72905ae54f54948401f753faa2c1 - Cache
+    librsvg/2.62.3#abe174fc0c191019ff73ee62792789f8 - Cache
+    libselinux/3.6#5a78ff6ae5034eeaac8da723361a8ce4 - Cache
+    libxft/2.3.9#dfc71e304b9d4c3dcf54a571281dbb86 - Cache
+    libxml2/2.15.3#3406c6d8d327e9b84c0c894feb859514 - Cache
+    lzo/2.10#f00b10acc508cea70645727d970a23e1 - Cache
+    pango/1.57.0#27e3f8ea574b5f7019614fc71c62a6fa - Cache
+    pcre2/10.42#9a35f5089feb875ec61a38eca364ce77 - Cache
+    pixman/0.43.4#60427f74e9514f007eb3cb8c52b6fbd6 - Cache
+    xorg/system#98f82cb669e4ebc6b4d9d8a4f3f1faf4 - Cache
+    xorg-macros/1.19.3#c3465b331ce1d044ee771dc5e4529b79 - Cache
+    xorg-proto/2024.1#449e77cf0df9acf515ddc79d0fe24938 - Cache
+    xz_utils/5.8.3#a8432fead347c69d8b2737c35f936132 - Cache
+    zlib/1.3.2#1cb806da49011867778ffb6ac7190fcb - Cache
+    zstd/1.5.7#b68ca8e3de04ba5957761751d1d661f4 - Cache
+Build requirements
+    autoconf/2.71#51077f068e61700d65bb05541ea1e4b0 - Cache
+    automake/1.16.5#b91b7c384c3deaa9d535be02da14d04f - Cache
+    bison/3.8.2#c3490cbe0078b6fd3eb4cf5ed64144dc - Cache
+    bzip2/1.0.8#c470882369c2d95c5c77e970c0c7e321 - Cache
+    cmake/4.3.2#5bae0b181463ca4dc3e924a981367ee6 - Cache
+    elfutils/0.190#8e8c47bd9b2578e29a0341b09b977be8 - Cache
+    flex/2.6.4#efa781fc5088b47c895bd4eef6911f2e - Cache
+    gettext/0.22.5#2f6edba611e8db1a8a18488b116e8c2a - Cache
+    glib/2.85.3#2fef4f1c3f92c9eaf077ccd54b9404a3 - Cache
+    gnu-config/cci.20210814#466e9d4d7779e1c142443f7ea44b4284 - Cache
+    gperf/3.1#a7afdf8f7cccdc2dcd4d962370c33d4f - Cache
+    libffi/3.4.8#a045c00fb26779635e3bed40e80c5254 - Cache
+    libiconv/1.17#9923bc6dc6f106646d6967e0039a5ada - Cache
+    libmount/2.39.2#64850679fa9d5ead878e5076b0cab2a8 - Cache
+    libselinux/3.6#5a78ff6ae5034eeaac8da723361a8ce4 - Cache
+    libtool/2.4.7#14e7739cc128bc1623d2ed318008e47e - Cache
+    m4/1.4.19#34c4bbc3eeebe98ca6edf2f52d602e7d - Cache
+    meson/1.10.2#9d2d10681fe7fe61c788c58626c89b25 - Cache
+    ninja/1.13.2#c8c5dc2a52ed6e4e42a66d75b4717ceb - Cache
+    pcre2/10.42#9a35f5089feb875ec61a38eca364ce77 - Cache
+    pkgconf/2.0.3#c7ba7fd1d7d22534ee070ae60ed79604 - Cache
+    pkgconf/2.2.0#4ac315b50ef734072b00ff3aacbf52bf - Cache
+    pkgconf/2.5.1#93c2051284cba1279494a43a4fcfeae2 - Cache
+    xorg-macros/1.19.3#c3465b331ce1d044ee771dc5e4529b79 - Cache
+    xorg-macros/1.20.0#b721d2f8ca6804d072820cb551d8c4fa - Cache
+    xz_utils/5.8.3#a8432fead347c69d8b2737c35f936132 - Cache
+    zlib/1.3.2#1cb806da49011867778ffb6ac7190fcb - Cache
+    zstd/1.5.7#b68ca8e3de04ba5957761751d1d661f4 - Cache
+
+======== Computing necessary packages ========
+libselinux/3.6: WARN: risk: Transitive dependencies with 'headers=False' effect in 'package_id' is not necessary and suboptimal. Use required_conan_version='>=2.28' to activate it
+libselinux/3.6: WARN: risk: Transitive dependencies with 'headers=False' effect in 'package_id' is not necessary and suboptimal. Use required_conan_version='>=2.28' to activate it
+glib/2.85.3: WARN: risk: Transitive dependencies with 'headers=False' effect in 'package_id' is not necessary and suboptimal. Use required_conan_version='>=2.28' to activate it
+glib/2.85.3: WARN: risk: Transitive dependencies with 'headers=False' effect in 'package_id' is not necessary and suboptimal. Use required_conan_version='>=2.28' to activate it
+Requirements
+    brotli/1.1.0#3f631ef77008f7b5eb388780116371a3:faa9bd32cf56f9aa4954248221dd8e002ffe8a59#cc56e8a1b54ea964927ef12c17855675 - Cache
+    bzip2/1.0.8#c470882369c2d95c5c77e970c0c7e321:c6aeb3e4cfcfdb1df8d54511fc295fb4d67cff32#875f0915659a544b58cb974309821ed7 - Cache
+    cairo/1.18.4#a3845ccec428be648572c84a65f74f15:3f98342632b61dde7c434d409b1dab1e6a2d8dd4#a0b2ae209871be8e40ccc2a80cf70011 - Cache
+    elfutils/0.190#8e8c47bd9b2578e29a0341b09b977be8:46bb5e69c4b4411657a68239054dccc32dd715d5#10a7addaae867beaa7efbc83cfe8ff15 - Cache
+    expat/2.8.1#e2fa0a1a12da326521a3d622a475047a:38828efa78ca779a2cdf04a35e92f76097c541e7#9e9b6869607aa662d5cfc60d63f82e07 - Cache
+    fontconfig/2.17.1#c7138aa09e0fcc0e337511719c9bfb12:b42020eefa86d45607056587034a7a6a03207edf#c471c69486cf77e655a7fddf35b3815b - Cache
+    freetype/2.14.3#4ee27b7918b546a96d7e6898e3a02b34:a91dddf32e7438a586534519f62126a14bef4a83#877eded893beb9161b05223e996f0612 - Cache
+    fribidi/1.0.13#205942bdceca0837df53e7ebb0aaa86a:ba8b9b9d18b13a9029ef391c4c3221e9ed8348c8#189860e0e2d751723cc33b0d180de3e8 - Cache
+    glib/2.85.3#2fef4f1c3f92c9eaf077ccd54b9404a3:ad367d86173f723c6fff13042f8f0a67aaf69481#e7ff90588e05790b4c2e1e8371b72571 - Cache
+    harfbuzz/12.3.0#a5fef061896cd5c30e9a17c9d7920ad1:0275a88bf8b040490427cbad1c6f936181f0084a#33e305c8574c526d71bb1d4d0e247965 - Cache
+    libffi/3.4.8#a045c00fb26779635e3bed40e80c5254:17561cbc2922b459119809d525458e11e7bcb047#8570586c0a317528f271fe8c727a85ca - Cache
+    libiconv/1.17#9923bc6dc6f106646d6967e0039a5ada:17561cbc2922b459119809d525458e11e7bcb047#4bcce544a14c473c1c52b623290fff8f - Cache
+    libmount/2.39.2#64850679fa9d5ead878e5076b0cab2a8:17561cbc2922b459119809d525458e11e7bcb047#08fd6b9a5d2e6f1fdef5d939f065fcfe - Cache
+    libpng/1.6.58#19cb72905ae54f54948401f753faa2c1:b899ac9b7f8d46c5a4de96dd6d79dfb3cd4d09c6#a3bfed1d746324acb9543764e6981670 - Cache
+    librsvg/2.62.3#abe174fc0c191019ff73ee62792789f8:3f4ffc0bff2f6386ca4b8530af80d3e10d4ff72b#e31678897fbc3f07ccd7410a5ad119b1 - Cache
+    libselinux/3.6#5a78ff6ae5034eeaac8da723361a8ce4:6048c5014babe89d5d62ed0fa35b4be0c2e53eff#4e94c1a3ce4eeba34c2cba7125eb7aef - Cache
+    libxft/2.3.9#dfc71e304b9d4c3dcf54a571281dbb86:55e493dbb6d7c618b48e953b45375c74cf2dc0ca#20504ee382c01a675e4d9caca6b51841 - Cache
+    libxml2/2.15.3#3406c6d8d327e9b84c0c894feb859514:06cb4f8e5f847f0b6d0e4c524f9b45debeb168b2#268ba12d85ea7ce0ad2e75da2dd9644d - Cache
+    lzo/2.10#f00b10acc508cea70645727d970a23e1:17561cbc2922b459119809d525458e11e7bcb047#8316ef8cc7dff5739beb1fb3ca1ffeba - Cache
+    pango/1.57.0#27e3f8ea574b5f7019614fc71c62a6fa:2c17b83d5815b98afe7a248ef7216b1e1bba1e5c#a758147964123783a849feb5c8a15464 - Cache
+    pcre2/10.42#9a35f5089feb875ec61a38eca364ce77:ac52646359464e3ac281873705d7e052dd32df08#32ed6be013c0e52055d08b75dc517023 - Cache
+    pixman/0.43.4#60427f74e9514f007eb3cb8c52b6fbd6:17561cbc2922b459119809d525458e11e7bcb047#e5217ba3dd9bef3d59365b17c2e5be89 - Cache
+    xorg-macros/1.19.3#c3465b331ce1d044ee771dc5e4529b79:da39a3ee5e6b4b0d3255bfef95601890afd80709#f6477c9b9eaafe88df13906bad42fbb4 - Cache
+    xorg-proto/2024.1#449e77cf0df9acf515ddc79d0fe24938:da39a3ee5e6b4b0d3255bfef95601890afd80709#7d3e106e18f31f9ad023213d6b67b6da - Cache
+    xorg/system#98f82cb669e4ebc6b4d9d8a4f3f1faf4:da39a3ee5e6b4b0d3255bfef95601890afd80709#0ba8627bd47edc3a501e8f0eb9a79e5e - Cache
+    xz_utils/5.8.3#a8432fead347c69d8b2737c35f936132:39c446fe1440cbab4a1379ce79dd8f1d27c1a4ae#e19436044020c52d48291b0980d903ea - Cache
+    zlib/1.3.2#1cb806da49011867778ffb6ac7190fcb:17561cbc2922b459119809d525458e11e7bcb047#9ac897b63ed49b4efe0b3e23622840c8 - Cache
+    zstd/1.5.7#b68ca8e3de04ba5957761751d1d661f4:6ed7bd7d6abb8cd95a63c74849b05ffa08d203bf#3360cfe7ab82c472f074cef502e757dd - Cache
+Build requirements
+Skipped binaries
+    autoconf/2.71, automake/1.16.5, bison/3.8.2, bzip2/1.0.8, cmake/4.3.2, elfutils/0.190, flex/2.6.4, gettext/0.22.5, glib/2.85.3, gnu-config/cci.20210814, gperf/3.1, libffi/3.4.8, libiconv/1.17, libmount/2.39.2, libselinux/3.6, libtool/2.4.7, m4/1.4.19, meson/1.10.2, ninja/1.13.2, pcre2/10.42, pkgconf/2.0.3, pkgconf/2.2.0, pkgconf/2.5.1, xorg-macros/1.19.3, xorg-macros/1.20.0, xz_utils/5.8.3, zlib/1.3.2, zstd/1.5.7
+xorg/system: System requirements: libx11-dev libx11-xcb-dev libfontenc-dev libice-dev libsm-dev libxau-dev libxaw7-dev libxcomposite-dev libxcursor-dev libxdamage-dev libxdmcp-dev libxext-dev libxfixes-dev libxi-dev libxinerama-dev libxkbfile-dev libxmu-dev libxmuu-dev libxpm-dev libxrandr-dev libxrender-dev libxres-dev libxss-dev libxt-dev libxtst-dev libxv-dev libxxf86vm-dev libxcb-glx0-dev libxcb-render0-dev libxcb-render-util0-dev libxcb-xkb-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-randr0-dev libxcb-shape0-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-xinerama0-dev libxcb-dri3-dev uuid-dev libxcb-cursor-dev libxcb-dri2-0-dev libxcb-dri3-dev libxcb-present-dev libxcb-composite0-dev libxcb-ewmh-dev libxcb-res0-dev already installed
+xorg/system: System requirements: libxcb-util-dev already installed
+
+======== Installing packages ========
+brotli/1.1.0: Already installed! (1 of 28)
+bzip2/1.0.8: Already installed! (2 of 28)
+libffi/3.4.8: Already installed! (3 of 28)
+libiconv/1.17: Already installed! (4 of 28)
+libmount/2.39.2: Already installed! (5 of 28)
+lzo/2.10: Already installed! (6 of 28)
+xorg/system: Already installed! (7 of 28)
+xz_utils/5.8.3: Already installed! (8 of 28)
+zlib/1.3.2: Already installed! (9 of 28)
+zstd/1.5.7: Already installed! (10 of 28)
+expat/2.8.1: Already installed! (11 of 28)
+fribidi/1.0.13: Already installed! (12 of 28)
+pixman/0.43.4: Already installed! (13 of 28)
+xorg-macros/1.19.3: Already installed! (14 of 28)
+xorg-macros/1.19.3: Appending AUTOMAKE_CONAN_INCLUDES environment variable: /home/uilian/.conan2/p/xorg-a7814e7f591fa/p/bin/share/aclocal
+xorg-macros/1.19.3: WARN: deprecated: The use of 'unix_path_legacy_compat' is deprecated in Conan 2.0 and does not perform path conversions. This is retained for compatibility with Conan 1.x and will be removed in a future version.
+libpng/1.6.58: Already installed! (15 of 28)
+libxml2/2.15.3: Already installed! (16 of 28)
+pcre2/10.42: Already installed! (17 of 28)
+elfutils/0.190: Already installed! (18 of 28)
+elfutils/0.190: Appending PATH env var with : /home/uilian/.conan2/p/elfutab214d4443f10/p/bin
+elfutils/0.190: Setting ADDR2LINE to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-addr2line
+elfutils/0.190: Setting AR to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-ar
+elfutils/0.190: Setting ELFCLASSIFY to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-elfclassify
+elfutils/0.190: Setting ELFCMP to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-elfcmp
+elfutils/0.190: Setting ELFCOMPRESS to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-elfcompress
+elfutils/0.190: Setting ELFLINT to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-elflint
+elfutils/0.190: Setting FINDTEXTREL to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-findtextrel
+elfutils/0.190: Setting MAKE_DEBUG_ARCHIVE to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-make-debug-archive
+elfutils/0.190: Setting NM to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-nm
+elfutils/0.190: Setting OBJDUMP to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-objdump
+elfutils/0.190: Setting RANLIB to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-ranlib
+elfutils/0.190: Setting READELF to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-readelf
+elfutils/0.190: Setting SIZE to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-size
+elfutils/0.190: Setting STACK to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-stack
+elfutils/0.190: Setting STRINGS to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-strings
+elfutils/0.190: Setting STRIP to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-strip
+elfutils/0.190: Setting UNSTRIP to /home/uilian/.conan2/p/elfutab214d4443f10/p/bin/eu-unstrip
+xorg-proto/2024.1: Already installed! (19 of 28)
+freetype/2.14.3: Already installed! (20 of 28)
+libselinux/3.6: Already installed! (21 of 28)
+fontconfig/2.17.1: Already installed! (22 of 28)
+glib/2.85.3: Already installed! (23 of 28)
+libxft/2.3.9: Already installed! (24 of 28)
+cairo/1.18.4: Already installed! (25 of 28)
+harfbuzz/12.3.0: Already installed! (26 of 28)
+pango/1.57.0: Already installed! (27 of 28)
+librsvg/2.62.3: Already installed! (28 of 28)
+WARN: deprecated: Usage of deprecated Conan 1.X features that will be removed in Conan 2.X:
+WARN: deprecated:     'cpp_info.names' used in: xorg-macros/1.19.3, bzip2/1.0.8
+WARN: deprecated:     'cpp_info.build_modules' used in: bzip2/1.0.8
+WARN: deprecated:     'env_info' used in: glib/2.85.3, xorg-macros/1.19.3, bzip2/1.0.8, elfutils/0.190
+WARN: deprecated:     'cpp_info.filenames' used in: xorg-proto/2024.1
+
+======== Testing the package ========
+Removing previously existing 'test_package' build folder: /home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/test_package/build/gcc-13-x86_64-gnu17-release
+librsvg/2.62.3 (test package): Test package build: build/gcc-13-x86_64-gnu17-release
+librsvg/2.62.3 (test package): Test package build folder: /home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/test_package/build/gcc-13-x86_64-gnu17-release
+librsvg/2.62.3 (test package): Writing generators to /home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/test_package/build/gcc-13-x86_64-gnu17-release/generators
+librsvg/2.62.3 (test package): Generator 'CMakeDeps' calling 'generate()'
+librsvg/2.62.3 (test package): CMakeDeps necessary find_package() and targets for your CMakeLists.txt
+    find_package(librsvg)
+    target_link_libraries(... librsvg::librsvg)
+librsvg/2.62.3 (test package): Generator 'CMakeToolchain' calling 'generate()'
+librsvg/2.62.3 (test package): CMakeToolchain generated: conan_toolchain.cmake
+librsvg/2.62.3 (test package): CMakeToolchain generated: /home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/test_package/build/gcc-13-x86_64-gnu17-release/generators/CMakePresets.json
+librsvg/2.62.3 (test package): CMakeToolchain generated: /home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/test_package/CMakeUserPresets.json
+librsvg/2.62.3 (test package): Generating aggregated env files
+librsvg/2.62.3 (test package): Generated aggregated env files: ['conanbuild.sh', 'conanrun.sh']
+
+======== Testing the package: Building ========
+librsvg/2.62.3 (test package): Calling build()
+librsvg/2.62.3 (test package): Running CMake.configure()
+librsvg/2.62.3 (test package): RUN: cmake -G "Ninja" -DCMAKE_TOOLCHAIN_FILE="generators/conan_toolchain.cmake" -DCMAKE_INSTALL_PREFIX="/home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/test_package" -DCMAKE_POLICY_DEFAULT_CMP0091="NEW" -DCMAKE_BUILD_TYPE="Release" "/home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/test_package" --loglevel=VERBOSE
+-- Using Conan toolchain: /home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/test_package/build/gcc-13-x86_64-gnu17-release/generators/conan_toolchain.cmake
+-- Conan toolchain: Defining architecture flag: -m64
+-- Conan toolchain: C++ Standard 17 with extensions ON
+-- The CXX compiler identification is GNU 13.1.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/g++-13 - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Conan: Target declared 'librsvg::librsvg'
+-- Conan: Library rsvg-2 found /home/uilian/.conan2/p/b/librs80db293bcfa07/p/lib/librsvg-2.so
+-- Conan: Found: /home/uilian/.conan2/p/b/librs80db293bcfa07/p/lib/librsvg-2.so
+-- Conan: Component target declared 'pango::pango_'
+-- Conan: Component target declared 'pango::pangoft2'
+-- Conan: Component target declared 'pango::pangofc'
+-- Conan: Component target declared 'pango::pangoroot'
+-- Conan: Component target declared 'pango::pangoxft'
+-- Conan: Component target declared 'pango::pangocairo'
+-- Conan: Target declared 'pango::pango'
+-- Conan: Target declared 'libxft::libxft'
+-- Conan: Component target declared 'xorg-proto::applewmproto'
+-- Conan: Component target declared 'xorg-proto::bigreqsproto'
+-- Conan: Component target declared 'xorg-proto::compositeproto'
+-- Conan: Component target declared 'xorg-proto::damageproto'
+-- Conan: Component target declared 'xorg-proto::dmxproto'
+-- Conan: Component target declared 'xorg-proto::dpmsproto'
+-- Conan: Component target declared 'xorg-proto::dri2proto'
+-- Conan: Component target declared 'xorg-proto::dri3proto'
+-- Conan: Component target declared 'xorg-proto::fixesproto'
+-- Conan: Component target declared 'xorg-proto::fontsproto'
+-- Conan: Component target declared 'xorg-proto::glproto'
+-- Conan: Component target declared 'xorg-proto::inputproto'
+-- Conan: Component target declared 'xorg-proto::kbproto'
+-- Conan: Component target declared 'xorg-proto::presentproto'
+-- Conan: Component target declared 'xorg-proto::randrproto'
+-- Conan: Component target declared 'xorg-proto::recordproto'
+-- Conan: Component target declared 'xorg-proto::renderproto'
+-- Conan: Component target declared 'xorg-proto::resourceproto'
+-- Conan: Component target declared 'xorg-proto::scrnsaverproto'
+-- Conan: Component target declared 'xorg-proto::videoproto'
+-- Conan: Component target declared 'xorg-proto::xcmiscproto'
+-- Conan: Component target declared 'xorg-proto::xextproto'
+-- Conan: Component target declared 'xorg-proto::xf86bigfontproto'
+-- Conan: Component target declared 'xorg-proto::xf86dgaproto'
+-- Conan: Component target declared 'xorg-proto::xf86driproto'
+-- Conan: Component target declared 'xorg-proto::xf86vidmodeproto'
+-- Conan: Component target declared 'xorg-proto::xineramaproto'
+-- Conan: Component target declared 'xorg-proto::xproto'
+-- Conan: Component target declared 'xorg-proto::xwaylandproto'
+-- Conan: Target declared 'xorg-proto::xorg-proto'
+-- Conan: Target declared 'xorg-macros::xorg-macros'
+-- Conan: Target declared 'Fontconfig::Fontconfig'
+-- Conan: Target declared 'expat::expat'
+-- Conan: Target declared 'Freetype::Freetype'
+-- Conan: Target declared 'PNG::PNG'
+-- Conan: Target declared 'ZLIB::ZLIB'
+-- Conan: Component target declared 'brotli::brotlicommon'
+-- Conan: Component target declared 'brotli::brotlidec'
+-- Conan: Component target declared 'brotli::brotlienc'
+-- Conan: Target declared 'brotli::brotli'
+-- Conan: Target declared 'BZip2::BZip2'
+-- Conan: Including build module from '/home/uilian/.conan2/p/bzip2fb3260e7b2ab3/p/lib/cmake/conan-official-bzip2-variables.cmake'
+-- Conan: Including build module from '/home/uilian/.conan2/p/freetc50f364f37f09/p/lib/cmake/conan-official-freetype-variables.cmake'
+-- Conan: Component target declared 'xorg::x11'
+-- Conan: Component target declared 'xorg::x11-xcb'
+-- Conan: Component target declared 'xorg::fontenc'
+-- Conan: Component target declared 'xorg::ice'
+-- Conan: Component target declared 'xorg::xau'
+-- Conan: Component target declared 'xorg::xaw7'
+-- Conan: Component target declared 'xorg::xcomposite'
+-- Conan: Component target declared 'xorg::xcursor'
+-- Conan: Component target declared 'xorg::xdamage'
+-- Conan: Component target declared 'xorg::xdmcp'
+-- Conan: Component target declared 'xorg::xext'
+-- Conan: Component target declared 'xorg::xfixes'
+-- Conan: Component target declared 'xorg::xi'
+-- Conan: Component target declared 'xorg::xinerama'
+-- Conan: Component target declared 'xorg::xkbfile'
+-- Conan: Component target declared 'xorg::xmu'
+-- Conan: Component target declared 'xorg::xmuu'
+-- Conan: Component target declared 'xorg::xpm'
+-- Conan: Component target declared 'xorg::xrandr'
+-- Conan: Component target declared 'xorg::xrender'
+-- Conan: Component target declared 'xorg::xres'
+-- Conan: Component target declared 'xorg::xscrnsaver'
+-- Conan: Component target declared 'xorg::xt'
+-- Conan: Component target declared 'xorg::xtst'
+-- Conan: Component target declared 'xorg::xv'
+-- Conan: Component target declared 'xorg::xxf86vm'
+-- Conan: Component target declared 'xorg::xcb-xkb'
+-- Conan: Component target declared 'xorg::xcb-icccm'
+-- Conan: Component target declared 'xorg::xcb-image'
+-- Conan: Component target declared 'xorg::xcb-keysyms'
+-- Conan: Component target declared 'xorg::xcb-randr'
+-- Conan: Component target declared 'xorg::xcb-render'
+-- Conan: Component target declared 'xorg::xcb-renderutil'
+-- Conan: Component target declared 'xorg::xcb-shape'
+-- Conan: Component target declared 'xorg::xcb-shm'
+-- Conan: Component target declared 'xorg::xcb-sync'
+-- Conan: Component target declared 'xorg::xcb-xfixes'
+-- Conan: Component target declared 'xorg::xcb-xinerama'
+-- Conan: Component target declared 'xorg::xcb'
+-- Conan: Component target declared 'xorg::xcb-atom'
+-- Conan: Component target declared 'xorg::xcb-aux'
+-- Conan: Component target declared 'xorg::xcb-event'
+-- Conan: Component target declared 'xorg::xcb-util'
+-- Conan: Component target declared 'xorg::xcb-dri3'
+-- Conan: Component target declared 'xorg::xcb-cursor'
+-- Conan: Component target declared 'xorg::xcb-dri2'
+-- Conan: Component target declared 'xorg::xcb-glx'
+-- Conan: Component target declared 'xorg::xcb-present'
+-- Conan: Component target declared 'xorg::xcb-composite'
+-- Conan: Component target declared 'xorg::xcb-ewmh'
+-- Conan: Component target declared 'xorg::xcb-res'
+-- Conan: Component target declared 'xorg::uuid'
+-- Conan: Component target declared 'xorg::sm'
+-- Conan: Target declared 'xorg::xorg'
+-- Conan: Component target declared 'cairo::cairo_'
+-- Conan: Component target declared 'cairo::cairo-png'
+-- Conan: Component target declared 'cairo::cairo-svg'
+-- Conan: Component target declared 'cairo::cairo-fc'
+-- Conan: Component target declared 'cairo::cairo-ft'
+-- Conan: Component target declared 'cairo::cairo-xlib'
+-- Conan: Component target declared 'cairo::cairo-xlib-xrender'
+-- Conan: Component target declared 'cairo::cairo-xcb'
+-- Conan: Component target declared 'cairo::cairo-xcb-shm'
+-- Conan: Component target declared 'cairo::cairo-xlib-xcb'
+-- Conan: Component target declared 'cairo::cairo-script'
+-- Conan: Component target declared 'cairo::cairo-ps'
+-- Conan: Component target declared 'cairo::cairo-pdf'
+-- Conan: Component target declared 'cairo::cairo-script-interpreter'
+-- Conan: Component target declared 'cairo::cairo-xml'
+-- Conan: Component target declared 'cairo::cairo-util_'
+-- Conan: Component target declared 'cairo::cairo-gobject'
+-- Conan: Target declared 'cairo::cairo'
+-- Conan: Target declared 'pixman::pixman'
+-- Conan: Target declared 'lzo::lzo'
+-- Conan: Component target declared 'glib::glib-2.0'
+-- Conan: Component target declared 'glib::gresource'
+-- Conan: Component target declared 'glib::gmodule-no-export-2.0'
+-- Conan: Component target declared 'glib::gobject-2.0'
+-- Conan: Component target declared 'glib::gthread-2.0'
+-- Conan: Component target declared 'glib::gmodule-export-2.0'
+-- Conan: Component target declared 'glib::gmodule-2.0'
+-- Conan: Component target declared 'glib::gio-2.0'
+-- Conan: Component target declared 'glib::gio-unix-2.0'
+-- Conan: Target declared 'glib::glib'
+-- Conan: Target declared 'libffi::libffi'
+-- Conan: Component target declared 'elfutils::libelf'
+-- Conan: Component target declared 'elfutils::libdw'
+-- Conan: Component target declared 'elfutils::libasm'
+-- Conan: Target declared 'elfutils::elfutils'
+-- Conan: Target declared 'LibLZMA::LibLZMA'
+-- Conan: Including build module from '/home/uilian/.conan2/p/xz_utc54e905cffd61/p/lib/cmake/conan-official-xz_utils-variables.cmake'
+-- Conan: Component target declared 'zstd::libzstd_shared'
+-- Conan: Component target declared 'libmount::libblkid'
+-- Conan: Component target declared 'libmount::libmount'
+-- Conan: Component target declared 'libselinux::sepol'
+-- Conan: Component target declared 'libselinux::selinux'
+-- Conan: Target declared 'libselinux::libselinux'
+-- Conan: Component target declared 'PCRE2::8BIT'
+-- Conan: Component target declared 'PCRE2::16BIT'
+-- Conan: Component target declared 'PCRE2::32BIT'
+-- Conan: Component target declared 'PCRE2::POSIX'
+-- Conan: Target declared 'pcre2::pcre2'
+-- Conan: Target declared 'fribidi::fribidi'
+-- Conan: Component target declared 'harfbuzz::harfbuzz'
+-- Conan: Component target declared 'harfbuzz::subset'
+-- Conan: Component target declared 'harfbuzz::gobject'
+-- Conan: Target declared 'LibXml2::LibXml2'
+-- Conan: Target declared 'Iconv::Iconv'
+-- Configuring done (0.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/test_package/build/gcc-13-x86_64-gnu17-release
+
+librsvg/2.62.3 (test package): Running CMake.build()
+librsvg/2.62.3 (test package): RUN: cmake --build "/home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/test_package/build/gcc-13-x86_64-gnu17-release" --verbose -- -j12
+Change Dir: '/home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/test_package/build/gcc-13-x86_64-gnu17-release'
+
+Run Build Command(s): /opt/pyenv/versions/3.12.4/bin/ninja -v -j12
+[1/2] /usr/bin/g++-13  -isystem /home/uilian/.conan2/p/b/librs80db293bcfa07/p/include/librsvg-2.0 -isystem /home/uilian/.conan2/p/glibf5cc7ccee5cfd/p/include -isystem /home/uilian/.conan2/p/glibf5cc7ccee5cfd/p/include/glib-2.0 -isystem /home/uilian/.conan2/p/glibf5cc7ccee5cfd/p/lib/glib-2.0/include -isystem /home/uilian/.conan2/p/zlib1b2a47904a59e/p/include -isystem /home/uilian/.conan2/p/freetc50f364f37f09/p/include -isystem /home/uilian/.conan2/p/freetc50f364f37f09/p/include/freetype2 -isystem /home/uilian/.conan2/p/libpn3113c2b2996ac/p/include -isystem /home/uilian/.conan2/p/glibf5cc7ccee5cfd/p/include/gio-unix-2.0 -isystem /home/uilian/.conan2/p/fontc061820cc7cd2b/p/include -isystem /home/uilian/.conan2/p/expata4dcad4ae710f/p/include -isystem /home/uilian/.conan2/p/cairoee35b70223e53/p/include/cairo -isystem /home/uilian/.conan2/p/cairoee35b70223e53/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -pthread -MD -MT CMakeFiles/test_package.dir/test_package.cpp.o -MF CMakeFiles/test_package.dir/test_package.cpp.o.d -o CMakeFiles/test_package.dir/test_package.cpp.o -c /home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/test_package/test_package.cpp
+/home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/test_package/test_package.cpp: In function ‘int main()’:
+/home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/test_package/test_package.cpp:9:21: warning: ‘void rsvg_handle_free(RsvgHandle*)’ is deprecated: Use 'g_object_unref' instead [-Wdeprecated-declarations]
+    9 |     rsvg_handle_free(handle);
+      |     ~~~~~~~~~~~~~~~~^~~~~~~~
+In file included from /home/uilian/Development/conan/conan-center-index/recipes/librsvg/all/test_package/test_package.cpp:4:
+/home/uilian/.conan2/p/b/librs80db293bcfa07/p/include/librsvg-2.0/librsvg/rsvg.h:1233:6: note: declared here
+ 1233 | void rsvg_handle_free (RsvgHandle *handle);
+      |      ^~~~~~~~~~~~~~~~
+[2/2] : && /usr/bin/g++-13 -m64 -O3 -DNDEBUG -m64 CMakeFiles/test_package.dir/test_package.cpp.o -o test_package -L/home/uilian/.conan2/p/b/librs80db293bcfa07/p/lib   -L/home/uilian/.conan2/p/b/pango7fc6d4b0f1e68/p/lib   -L/home/uilian/.conan2/p/glibf5cc7ccee5cfd/p/lib   -L/home/uilian/.conan2/p/pcre256bb025014eef/p/lib   -L/home/uilian/.conan2/p/zlib1b2a47904a59e/p/lib   -L/home/uilian/.conan2/p/bzip2fb3260e7b2ab3/p/lib   -L/home/uilian/.conan2/p/libff8a671ff2f8cf6/p/lib   -L/home/uilian/.conan2/p/libmo1a45c23bdde07/p/lib   -L/home/uilian/.conan2/p/libse3fdbfafa19363/p/lib   -L/home/uilian/.conan2/p/fribi337451ee74631/p/lib   -L/home/uilian/.conan2/p/harfb366866eafc5c5/p/lib   -L/home/uilian/.conan2/p/freetc50f364f37f09/p/lib   -L/home/uilian/.conan2/p/libpn3113c2b2996ac/p/lib   -L/home/uilian/.conan2/p/brotl4f1743d324bc8/p/lib   -L/home/uilian/.conan2/p/elfutab214d4443f10/p/lib   -L/home/uilian/.conan2/p/xz_utc54e905cffd61/p/lib   -L/home/uilian/.conan2/p/zstdfe637538bff92/p/lib   -L/home/uilian/.conan2/p/fontc061820cc7cd2b/p/lib   -L/home/uilian/.conan2/p/expata4dcad4ae710f/p/lib   -L/home/uilian/.conan2/p/libxf910e3a976c60f/p/lib   -L/home/uilian/.conan2/p/cairoee35b70223e53/p/lib   -L/home/uilian/.conan2/p/lzo2bea6105b1d70/p/lib   -L/home/uilian/.conan2/p/pixma2d559370e5b62/p/lib   -L/home/uilian/.conan2/p/libxm4c393a633191b/p/lib   -L/home/uilian/.conan2/p/libic33aa452e6906e/p/lib -Wl,-rpath,/home/uilian/.conan2/p/b/librs80db293bcfa07/p/lib:/home/uilian/.conan2/p/b/pango7fc6d4b0f1e68/p/lib:/home/uilian/.conan2/p/glibf5cc7ccee5cfd/p/lib:/home/uilian/.conan2/p/pcre256bb025014eef/p/lib:/home/uilian/.conan2/p/zlib1b2a47904a59e/p/lib:/home/uilian/.conan2/p/bzip2fb3260e7b2ab3/p/lib:/home/uilian/.conan2/p/libff8a671ff2f8cf6/p/lib:/home/uilian/.conan2/p/libmo1a45c23bdde07/p/lib:/home/uilian/.conan2/p/libse3fdbfafa19363/p/lib:/home/uilian/.conan2/p/fribi337451ee74631/p/lib:/home/uilian/.conan2/p/harfb366866eafc5c5/p/lib:/home/uilian/.conan2/p/freetc50f364f37f09/p/lib:/home/uilian/.conan2/p/libpn3113c2b2996ac/p/lib:/home/uilian/.conan2/p/brotl4f1743d324bc8/p/lib:/home/uilian/.conan2/p/elfutab214d4443f10/p/lib:/home/uilian/.conan2/p/xz_utc54e905cffd61/p/lib:/home/uilian/.conan2/p/zstdfe637538bff92/p/lib:/home/uilian/.conan2/p/fontc061820cc7cd2b/p/lib:/home/uilian/.conan2/p/expata4dcad4ae710f/p/lib:/home/uilian/.conan2/p/libxf910e3a976c60f/p/lib:/home/uilian/.conan2/p/cairoee35b70223e53/p/lib:/home/uilian/.conan2/p/lzo2bea6105b1d70/p/lib:/home/uilian/.conan2/p/pixma2d559370e5b62/p/lib:/home/uilian/.conan2/p/libxm4c393a633191b/p/lib:/home/uilian/.conan2/p/libic33aa452e6906e/p/lib  /home/uilian/.conan2/p/b/librs80db293bcfa07/p/lib/librsvg-2.so  -lSM  -luuid  -lxcb-res  -lxcb-ewmh  -lxcb-composite  -lxcb-present  -lxcb-glx  -lxcb-dri2  -lxcb-cursor  -lxcb-dri3  -lxcb-util  -lxcb-xinerama  -lxcb-xfixes  -lxcb-sync  -lxcb-shape  -lxcb-render-util  -lxcb-randr  -lxcb-keysyms  -lxcb-image  -lxcb-icccm  -lxcb-xkb  -lXxf86vm  -lXv  -lXtst  -lXss  -lXRes  -lXrandr  -lXpm  -lXmuu  -lXmu  -lxkbfile  -lXinerama  -lXi  -lXdmcp  -lXdamage  -lXfixes  -lXcursor  -lXcomposite  -lXaw7  -lXt  -lXau  -lICE  -lfontenc  -lXrender  -lX11-xcb  -lxcb  -lxcb-shm  -lxcb-render  -lX11  -lXext  -lresolv  -lrt  -lm  -lpthread  -ldl && :
+
+
+
+======== Testing the package: Executing test ========
+librsvg/2.62.3 (test package): Running test()
+librsvg/2.62.3 (test package): RUN: ./test_package
+librsvg test package
+

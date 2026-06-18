@@ -1,0 +1,4 @@
+sources:
+  "2.62.3":
+    url: "https://gitlab.gnome.org/GNOME/librsvg/-/archive/2.62.3/librsvg-2.62.3.tar.gz"
+    sha256: "933e398c3e179767491eb45d64439a43cc00f6f876f25cfd918db7f033a21eeb"
