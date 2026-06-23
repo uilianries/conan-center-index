@@ -14,80 +14,22 @@ if(NOT HEADER_ONLY)
         target_link_libraries(test_boost_regex PRIVATE Boost::regex)
     endif()
 
-    if(WITH_TEST)
-        find_package(Boost COMPONENTS unit_test_framework REQUIRED)
-        add_executable(test_boost_unittest test.cpp)
-        target_link_libraries(test_boost_unittest PRIVATE Boost::unit_test_framework)
-    endif()
-
-    if(WITH_COROUTINE)
-        find_package(Boost COMPONENTS coroutine REQUIRED)
-        add_executable(test_boost_coroutine coroutine.cpp)
-        target_link_libraries(test_boost_coroutine PRIVATE Boost::coroutine)
-    endif()
-
     if(WITH_CHRONO)
         find_package(Boost COMPONENTS chrono REQUIRED)
         add_executable(test_boost_chrono chrono.cpp)
         target_link_libraries(test_boost_chrono PRIVATE Boost::chrono)
     endif()
 
-    if(WITH_FIBER)
-        find_package(Boost COMPONENTS fiber REQUIRED)
-        add_executable(test_boost_fiber fiber.cpp)
-        target_link_libraries(test_boost_fiber PRIVATE Boost::fiber)
+    if(WITH_FILESYSTEM)
+        find_package(Boost COMPONENTS filesystem REQUIRED)
+        add_executable(test_boost_filesystem filesystem.cpp)
+        target_link_libraries(test_boost_filesystem PRIVATE Boost::filesystem)
     endif()
 
     if(WITH_JSON)
         find_package(Boost COMPONENTS json REQUIRED)
         add_executable(test_boost_json json.cpp)
         target_link_libraries(test_boost_json PRIVATE Boost::json)
-    endif()
-
-    if(WITH_NOWIDE)
-        find_package(Boost COMPONENTS nowide REQUIRED)
-        add_executable(test_boost_nowide nowide.cpp)
-        target_link_libraries(test_boost_nowide PRIVATE Boost::nowide)
-    endif()
-
-    if(WITH_LOCALE)
-        find_package(Boost COMPONENTS locale REQUIRED)
-        add_executable(test_boost_locale locale.cpp)
-        target_link_libraries(test_boost_locale PRIVATE Boost::locale)
-    endif()
-
-    if(WITH_STACKTRACE)
-        find_package(Boost COMPONENTS stacktrace REQUIRED)
-        add_executable(test_boost_stacktrace_noop stacktrace.cpp)
-        target_link_libraries(test_boost_stacktrace_noop PRIVATE Boost::stacktrace_noop)
-    endif()
-
-    if (WITH_PROCESS)
-        find_package(Boost COMPONENTS process REQUIRED)
-        add_executable(test_boost_process process.cpp)
-        target_link_libraries(test_boost_process PRIVATE Boost::process)
-    endif()
-
-    if(WITH_PYTHON)
-        find_package(Boost COMPONENTS python REQUIRED)
-        add_library(hello_ext MODULE python.cpp)
-        set_property(TARGET hello_ext PROPERTY PREFIX "")
-
-        find_package(Python ${PYTHON_VERSION_TO_SEARCH} COMPONENTS Interpreter Development NumPy REQUIRED)
-
-        target_link_libraries(hello_ext PRIVATE Boost::python Python::Python)
-        if(WIN32)
-            set_target_properties(hello_ext PROPERTIES SUFFIX ".pyd")
-        endif()
-        add_custom_command(TARGET hello_ext POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=$<TARGET_FILE_DIR:hello_ext>" ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/python.py"
-            WORKING_DIRECTORY $<TARGET_FILE_DIR:hello_ext>
-            COMMENT "Running Boost.Python test"
-        )
-
-        add_executable(test_boost_numpy numpy.cpp)
-        target_link_libraries(test_boost_numpy PRIVATE Boost::numpy Python::Python Python::NumPy)
-        set_target_properties(test_boost_numpy PROPERTIES ENVIRONMENT "PYTHONPATH=${Python_SITELIB}")
     endif()
 
     if(WITH_URL)
