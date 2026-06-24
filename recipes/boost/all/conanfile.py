@@ -18,7 +18,7 @@ _CONFIGURE_OPTIONS = (
     "contract", "coroutine", "date_time", "exception", "fiber", "filesystem",
     "graph", "graph_parallel", "iostreams", "json", "locale", "log", "math",
     "mpi", "nowide", "process", "program_options", "python", "random",
-    "regex", "serialization", "stacktrace", "system", "test", "thread",
+    "regex", "serialization", "stacktrace", "test", "thread",
     "timer", "type_erasure", "url", "wave",
 )
 
@@ -165,7 +165,6 @@ class B2Tool:
             flags.extend(shlex.split(str(self._conanfile.options.extra_b2_flags)))
 
         tc = AutotoolsToolchain(self._conanfile)
-        tc.generate()
 
         if tc.cxxflags:
             flags.append(f'cxxflags="{" ".join(tc.cxxflags)}"')
@@ -211,10 +210,11 @@ class BoostConan(ConanFile):
         **{f"without_{o}": o in _DEFAULT_WITHOUT for o in _CONFIGURE_OPTIONS},
     }
     implements = ["auto_shared_fpic", "auto_header_only"]
+    no_copy_source = True
 
     @property
     def _dependencies(self):
-        return self.conan_data["dependencies"][self.version]["dependencies"]
+        return self.conan_data["dependencies"][self.version]
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -239,6 +239,8 @@ class BoostConan(ConanFile):
     def generate(self):
         if not self.options.header_only:
             tc = B2Toolchain(self)
+            tc.generate()
+            tc = AutotoolsToolchain(self)
             tc.generate()
 
     def build(self):
@@ -269,27 +271,28 @@ class BoostConan(ConanFile):
         if self.options.header_only:
             self.cpp_info.bindirs = []
             self.cpp_info.libdirs = []
-        else:
-            deps = self._dependencies
-            installed = set(collect_libs(self))
+            return
 
-            # INFO: Mimic BoostConfig.cmake
-            for module, libs in deps["libs"].items():
-                if self.options.get_safe(f"without_{module}"):
-                    continue
-                comp = self.cpp_info.components[module]
-                comp.libs = [lib for lib in libs if lib in installed]
-                comp.set_property("cmake_target_name", f"Boost::{module}")
-                inter = [d for d in deps["dependencies"].get(module, [])
-                        if not self.options.get_safe(f"without_{d}", False)]
-                comp.requires = inter
-                if module == "iostreams":
-                    comp.requires.extend(["zlib::zlib", "bzip2::bzip2", "xz_utils::xz_utils", "zstd::zstd"])
-                elif module == "locale":
-                    comp.requires.append("icu::icu")
-                # Disable Boost's MSVC auto-link pragma for compiled modules
-                if comp.libs:
-                    comp.defines = [f"BOOST_{module.upper()}_NO_LIB"]
+        deps = self._dependencies
+        installed = set(collect_libs(self))
+
+        # INFO: Mimic BoostConfig.cmake
+        for module, libs in deps["libs"].items():
+            if self.options.get_safe(f"without_{module}"):
+                continue
+            comp = self.cpp_info.components[module]
+            comp.libs = [lib for lib in libs if lib in installed]
+            comp.set_property("cmake_target_name", f"Boost::{module}")
+            inter = [d for d in deps["dependencies"].get(module, [])
+                     if not self.options.get_safe(f"without_{d}", False)]
+            comp.requires = inter
+            if module == "iostreams":
+                comp.requires.extend(["zlib::zlib", "bzip2::bzip2", "xz_utils::xz_utils", "zstd::zstd"])
+            elif module == "locale":
+                comp.requires.append("icu::icu-uc")
+            # Disable Boost's MSVC auto-link pragma for compiled modules
+            if comp.libs:
+                comp.defines = [f"BOOST_{module.upper()}_NO_LIB"]
 
         # Header-only umbrella; Boost::boost is the traditional alias (mirrors BoostConfig.cmake)
         self.cpp_info.components["headers"].libs = []
@@ -305,10 +308,11 @@ class BoostConan(ConanFile):
             comp.set_property("cmake_target_name", f"Boost::{util}")
             if self.settings.os == "Windows":
                 comp.defines = [define]
-                
+
         # System libraries attached to the components that need them
         if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.components["thread"].system_libs = ["pthread", "rt"]
+            if not self.options.get_safe("without_thread"):
+                self.cpp_info.components["thread"].system_libs = ["pthread", "rt"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["headers"].system_libs = ["bcrypt"]
             if self.options.shared:
