@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.build import build_jobs
-from conan.tools.files import chdir, collect_libs, copy, get, save
+from conan.tools.files import chdir, collect_libs, copy, get, save, rmdir, rm
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -13,66 +13,177 @@ import yaml
 
 required_conan_version = ">=2.4"
 
-_EXCLUDED_MODULES = ["python", "mpi", "graph_parallel", "cobalt", "stacktrace"]
+# TODO: It can be extracted dynamically from dependencies.yml, but could result in different recipe revision.
+_CONFIGURE_OPTIONS = (
+    "atomic", "charconv", "chrono", "cobalt", "container", "context",
+    "contract", "coroutine", "date_time", "exception", "fiber", "filesystem",
+    "graph", "graph_parallel", "iostreams", "json", "locale", "log", "math",
+    "mpi", "nowide", "process", "program_options", "python", "random",
+    "regex", "serialization", "stacktrace", "system", "test", "thread",
+    "timer", "type_erasure", "url", "wave",
+)
+
+# Disabled by default: require heavy external deps or are niche/C++20-only.
+_DEFAULT_WITHOUT = {"python", "mpi", "graph_parallel", "cobalt", "stacktrace"}
 
 
 class B2Toolchain:
-    """Generates user-config.jam for Boost.Build with the active compiler and dependencies."""
+    """Generates the user-config.jam used to build Boost with B2"""
 
     def __init__(self, conanfile):
         self._conanfile = conanfile
-        tc = AutotoolsToolchain(conanfile)
-        self.cxxflags = tc.cxxflags
-        self.ldflags = tc.ldflags
 
     @property
     def toolset(self):
-        conanfile = self._conanfile
-        compiler = str(conanfile.settings.compiler)
-        if conanfile.settings.os == "Windows":
-            if compiler == "gcc":
+        if self._conanfile.settings.os == "Windows":
+            if self._conanfile.settings.compiler == "gcc":
                 return "mingw"
-            if compiler == "clang":
+            if self._conanfile.settings.compiler == "clang":
                 return "clang-win"
-        if compiler == "apple-clang":
+        if self._conanfile.settings.compiler == "apple-clang":
             return "darwin"
-        return compiler
+        return str(self._conanfile.settings.compiler)
 
     @property
     def _cxx(self):
-        conanfile = self._conanfile
-        compilers = conanfile.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+        compilers = self._conanfile.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
         if "cpp" in compilers:
             return compilers["cpp"]
-        vars = VirtualBuildEnv(conanfile).vars()
-        if "CXX" in vars:
-            return vars["CXX"]
-        if is_apple_os(conanfile):
-            return XCRun(conanfile).cxx
+        env_vars = VirtualBuildEnv(self._conanfile).vars()
+        if "CXX" in env_vars:
+            return env_vars["CXX"]
+        if is_apple_os(self._conanfile):
+            return XCRun(self._conanfile).cxx
         return None
 
+    @property
+    def user_config_path(self):
+        return os.path.join(self._conanfile.source_folder, "tools", "build", "user-config.jam")
+
     def generate(self):
-        conanfile = self._conanfile
-        cxx = self._cxx
-        # b2 misparses versioned binary names (e.g. g++-13); supply version explicitly.
-        version = str(conanfile.settings.compiler.version) if cxx else ""
-        cxx_spec = f" : {version} : \"{cxx}\"" if cxx else ""
+        version = str(self._conanfile.settings.compiler.version) if self._cxx else ""
+        cxx_spec = f" : {version} : \"{self._cxx}\"" if self._cxx else ""
         lines = [f"using {self.toolset}{cxx_spec} ;"]
 
         for dep_name, b2_name in [("zlib", "zlib"), ("bzip2", "bzip2"),
                                    ("xz_utils", "lzma"), ("zstd", "zstd")]:
-            if dep_name not in conanfile.dependencies:
+            if dep_name not in self._conanfile.dependencies:
                 continue
-            dep = conanfile.dependencies[dep_name]
+            dep = self._conanfile.dependencies[dep_name]
             info = dep.cpp_info.aggregated_components()
             inc = info.includedirs[0].replace("\\", "/")
             lib = info.libdirs[0].replace("\\", "/")
             lines.append(f'using {b2_name} : : <include>"{inc}" <search>"{lib}" ;')
 
-        path = os.path.join(conanfile.source_folder, "tools", "build", "user-config.jam")
-        save(conanfile, path, "\n".join(lines) + "\n")
-        return path
+        save(self._conanfile, self.user_config_path, "\n".join(lines) + "\n")
 
+
+class B2Tool:
+    def __init__(self, conanfile):
+        self._conanfile = conanfile
+
+    @property
+    def _os(self):
+        return {
+            "Windows": "windows", "WindowsStore": "windows", "Linux": "linux",
+            "Android": "android", "Macos": "darwin", "iOS": "iphone",
+            "watchOS": "iphone", "tvOS": "appletv", "FreeBSD": "freebsd",
+            "SunOS": "solaris",
+        }.get(str(self._conanfile.settings.os))
+
+    @property
+    def _arch(self):
+        arch = str(self._conanfile.settings.arch)
+        for prefix, name in [("x86", "x86"), ("ppc", "power"), ("arm", "arm"),
+                              ("sparc", "sparc"), ("mips64", "mips64"), ("mips", "mips1"),
+                              ("s390", "s390x"), ("riscv", "riscv")]:
+            if arch.startswith(prefix):
+                return name
+        return None
+
+    @property
+    def _address_model(self):
+        return "64" if str(self._conanfile.settings.arch) in (
+            "x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3",
+            "sparcv9", "s390x", "riscv64", "wasm64",
+        ) else "32"
+
+    @property
+    def _abi(self):
+        if str(self._conanfile.settings.arch).startswith("arm"):
+            return "aapcs"
+        if str(self._conanfile.settings.os) in ("Linux", "FreeBSD", "SunOS", "Android"):
+            return "sysv"
+        if str(self._conanfile.settings.os) == "Windows":
+            return "ms" if is_msvc(self._conanfile) else "sysv"
+        return None
+
+    @property
+    def _binary_format(self):
+        return {
+            "Windows": "pe", "WindowsStore": "pe",
+            "Linux": "elf", "FreeBSD": "elf", "Android": "elf", "SunOS": "elf",
+            "Macos": "mach-o", "iOS": "mach-o", "watchOS": "mach-o", "tvOS": "mach-o",
+        }.get(str(self._conanfile.settings.os))
+
+    def build(self, user_config, toolset):
+        flags = [
+            "-q",
+            f"toolset={toolset}",
+            "--layout=system",
+            f"--user-config={user_config}",
+            "threading=multi",
+            f"link={'shared' if self._conanfile.options.shared else 'static'}",
+            "variant=debug" if self._conanfile.settings.build_type == "Debug" else "variant=release",
+        ]
+
+        if self._os:
+            flags.append(f"target-os={self._os}")
+        if self._arch:
+            flags.append(f"architecture={self._arch}")
+        flags.append(f"address-model={self._address_model}")
+        if self._abi:
+            flags.append(f"abi={self._abi}")
+        if self._binary_format:
+            flags.append(f"binary-format={self._binary_format}")
+
+        if is_msvc(self._conanfile):
+            flags.append(f"runtime-link={'static' if is_msvc_static_runtime(self._conanfile) else 'shared'}")
+
+        for module in _CONFIGURE_OPTIONS:
+            if self._conanfile.options.get_safe(f"without_{module}"):
+                flags.append(f"--without-{module}")
+
+        if not self._conanfile.options.without_iostreams:
+            flags += ["-sNO_ZLIB=0", "-sNO_BZIP2=0", "-sNO_LZMA=0", "-sNO_ZSTD=0"]
+        if not self._conanfile.options.without_locale and "icu" in self._conanfile.dependencies:
+            flags += ["boost.locale.icu=on",
+                      f"-sICU_PATH={self._conanfile.dependencies['icu'].package_folder}"]
+
+        if self._conanfile.options.extra_b2_flags:
+            flags.extend(shlex.split(str(self._conanfile.options.extra_b2_flags)))
+
+        tc = AutotoolsToolchain(self._conanfile)
+        tc.generate()
+
+        if tc.cxxflags:
+            flags.append(f'cxxflags="{" ".join(tc.cxxflags)}"')
+        if tc.ldflags:
+            flags.append(f'linkflags="{" ".join(tc.ldflags)}"')
+
+        verbosity = self._conanfile.conf.get("tools.build:verbosity", default="quiet", check_type=str)
+        njobs = build_jobs(self._conanfile)
+        flags += [
+            "install",
+            f"--prefix={self._conanfile.package_folder}",
+            f"--libdir={os.path.join(self._conanfile.package_folder, 'lib')}",
+            f"-j{njobs}" if njobs else "",
+            "--abbreviate-paths",
+            "-d2" if verbosity == "verbose" else "-d0",
+        ]
+
+        with chdir(self._conanfile, self._conanfile.source_folder):
+            self._conanfile.run(f"b2 {' '.join(flags)}")
 
 class BoostConan(ConanFile):
     name = "boost"
@@ -89,23 +200,24 @@ class BoostConan(ConanFile):
         "fPIC": [True, False],
         "header_only": [True, False],
         "extra_b2_flags": [None, "ANY"],
+        **{f"without_{o}": [True, False] for o in _CONFIGURE_OPTIONS},
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "header_only": False,
         "extra_b2_flags": None,
+        **{f"without_{o}": o in _DEFAULT_WITHOUT for o in _CONFIGURE_OPTIONS},
     }
     implements = ["auto_shared_fpic", "auto_header_only"]
+    no_copy_source = True
 
     def export(self):
-        copy(self, f"dependencies/dependencies-{self.version}.yml",
-             src=self.recipe_folder, dst=self.export_folder)
+        copy(self, f"dependencies-{self.version}.yml", src=os.path.join(self.recipe_folder, "dependencies"), dst=self.export_folder)
 
     @property
     def _dependencies(self):
-        deps_file = os.path.join(self.recipe_folder, "dependencies",
-                                 f"dependencies-{self.version}.yml")
+        deps_file = os.path.join(self.source_folder, f"dependencies-{self.version}.yml")
         with open(deps_file, encoding="utf-8") as f:
             return yaml.safe_load(f)
 
@@ -114,13 +226,13 @@ class BoostConan(ConanFile):
 
     def requirements(self):
         if not self.options.header_only:
-            # INFO: Boost Iostreams is the only module that requires these compression dependencies
-            self.requires("zlib/[>=1.2.11 <2]")
-            self.requires("bzip2/[>=1.0.8 <2]")
-            self.requires("xz_utils/[>=5.4.5 <6]")
-            self.requires("zstd/[>=1.5 <1.6]")
-            # INFO: Required by Boost.Locale
-            self.requires("icu/[>=73.2 <80]")
+            if not self.options.without_iostreams:
+                self.requires("zlib/[>=1.2.11 <2]")
+                self.requires("bzip2/[>=1.0.8 <2]")
+                self.requires("xz_utils/[>=5.4.5 <6]")
+                self.requires("zstd/[>=1.5 <1.6]")
+            if not self.options.without_locale:
+                self.requires("icu/[>=73.2 <80]")
 
     def build_requirements(self):
         if not self.options.header_only:
@@ -131,97 +243,29 @@ class BoostConan(ConanFile):
 
     def generate(self):
         if not self.options.header_only:
-            B2Toolchain(self).generate()
-
-    @property
-    def _b2_os(self):
-        return {
-            "Windows": "windows", "WindowsStore": "windows", "Linux": "linux",
-            "Android": "android", "Macos": "darwin", "iOS": "iphone",
-            "watchOS": "iphone", "tvOS": "appletv", "FreeBSD": "freebsd",
-            "SunOS": "solaris",
-        }.get(str(self.settings.os), str(self.settings.os).lower())
-
-    @property
-    def _b2_arch(self):
-        arch = str(self.settings.arch)
-        for prefix, name in [("x86", "x86"), ("ppc", "power"), ("arm", "arm"),
-                              ("sparc", "sparc"), ("mips64", "mips64"), ("mips", "mips1"),
-                              ("s390", "s390x"), ("riscv", "riscv")]:
-            if arch.startswith(prefix):
-                return name
-
-    @property
-    def _b2_address_model(self):
-        return "64" if self.settings.arch in (
-            "x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3",
-            "sparcv9", "s390x", "riscv64", "wasm64",
-        ) else "32"
+            tc = B2Toolchain(self)
+            tc.generate()
 
     def build(self):
         if self.options.header_only:
             return
-
-        #if cross_building(self, skip_x64_x86=True):
-        #    # INFO: Boost.Build tries to build stacktrace module even if it is excluded, and fails when cross-building.
-        #    replace_in_file(self, os.path.join(self.source_folder, "libs", "stacktrace", "build", "Jamfile.v2"), "$(>) > $(<)", 'echo "" > $(<)', strict=False)
-
         tc = B2Toolchain(self)
-        user_config = tc.generate()
-
-        flags = [
-            "-q",
-            f"toolset={tc.toolset}",
-            "--layout=system",
-            f"--user-config={user_config}",
-            "threading=multi",
-            f"link={'shared' if self.options.shared else 'static'}",
-            "variant=debug" if self.settings.build_type == "Debug" else "variant=release",
-        ]
-
-        if self._b2_os:
-            flags.append(f"target-os={self._b2_os}")
-        if self._b2_arch:
-            flags.append(f"architecture={self._b2_arch}")
-        flags.append(f"address-model={self._b2_address_model}")
-
-        if is_msvc(self):
-            flags.append(f"runtime-link={'static' if is_msvc_static_runtime(self) else 'shared'}")
-
-        for module in _EXCLUDED_MODULES:
-            flags.append(f"--without-{module}")
-
-        flags += ["-sNO_ZLIB=0", "-sNO_BZIP2=0", "-sNO_LZMA=0", "-sNO_ZSTD=0"]
-        flags += ["boost.locale.icu=on", f"-sICU_PATH={self.dependencies['icu'].package_folder}"]
-
-        if self.options.extra_b2_flags:
-            flags.extend(shlex.split(str(self.options.extra_b2_flags)))
-
-        if tc.cxxflags:
-            flags.append(f'cxxflags="{" ".join(tc.cxxflags)}"')
-        if tc.ldflags:
-            flags.append(f'linkflags="{" ".join(tc.ldflags)}"')
-
-        verbosity = self.conf.get("tools.build:verbosity", default="quiet", check_type=str)
-        njobs = build_jobs(self)
-        flags += [
-            "install",
-            f"--prefix={self.package_folder}",
-            f"--libdir={os.path.join(self.package_folder, 'lib')}",
-            f"-j{njobs}" if njobs else "",
-            "--abbreviate-paths",
-            "-d2" if verbosity == "verbose" else "-d0",
-        ]
-
-        with chdir(self, self.source_folder):
-            self.run(f"b2 {' '.join(flags)}")
+        b2 = B2Tool(self)
+        b2.build(tc.user_config_path, tc.toolset)
 
     def package(self):
         copy(self, "LICENSE_1_0.txt", src=self.source_folder,
              dst=os.path.join(self.package_folder, "licenses"))
         if self.options.header_only:
-            copy(self, "**", src=os.path.join(self.source_folder, "boost"),
-                 dst=os.path.join(self.package_folder, "include", "boost"))
+            copy(self, "**", src=os.path.join(self.source_folder, "boost"), dst=os.path.join(self.package_folder, "include", "boost"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        # FIXME: Some libraries produce both static and shared
+        # https://github.com/boostorg/boost/issues/1051
+        if self.options.shared:
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+        else:
+            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dylib*", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Boost")
@@ -235,14 +279,20 @@ class BoostConan(ConanFile):
         deps = self._dependencies
         installed = set(collect_libs(self))
 
+        # INFO: Mimic BoostConfig.cmake
         for module, libs in deps["libs"].items():
-            if module in _EXCLUDED_MODULES:
+            if self.options.get_safe(f"without_{module}"):
                 continue
             comp = self.cpp_info.components[module]
             comp.libs = [lib for lib in libs if lib in installed]
             comp.set_property("cmake_target_name", f"Boost::{module}")
-            inter = [d for d in deps["dependencies"].get(module, []) if d not in _EXCLUDED_MODULES]
+            inter = [d for d in deps["dependencies"].get(module, [])
+                     if not self.options.get_safe(f"without_{d}", False)]
             comp.requires = inter
+            if module == "iostreams":
+                comp.requires.extend(["zlib::zlib", "bzip2::bzip2", "xz_utils::xz_utils", "zstd::zstd"])
+            elif module == "locale":
+                comp.requires.append("icu::icu")
             # Disable Boost's MSVC auto-link pragma for compiled modules
             if comp.libs:
                 comp.defines = [f"BOOST_{module.upper()}_NO_LIB"]
@@ -262,11 +312,6 @@ class BoostConan(ConanFile):
             if self.settings.os == "Windows":
                 comp.defines = [define]
                 
-        if "iostreams" in self.cpp_info.components:
-            self.cpp_info.components["iostreams"].requires.extend(["zlib::zlib", "bzip2::bzip2", "lzma::lzma", "zstd::zstd"])
-        if "locale" in self.cpp_info.components:
-            self.cpp_info.components["locale"].requires.append("icu::icu")
-
         # System libraries attached to the components that need them
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["thread"].system_libs = ["pthread", "rt"]
