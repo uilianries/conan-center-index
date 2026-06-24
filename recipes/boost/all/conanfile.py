@@ -58,7 +58,9 @@ class B2Toolchain:
 
     @property
     def user_config_path(self):
-        return os.path.join(self._conanfile.source_folder, "tools", "build", "user-config.jam")
+        # Written to build_folder so parallel builds with different settings don't collide
+        # (no_copy_source=True makes source_folder shared across all variants).
+        return os.path.join(self._conanfile.build_folder, "user-config.jam")
 
     def generate(self):
         version = str(self._conanfile.settings.compiler.version) if self._cxx else ""
@@ -191,7 +193,7 @@ class BoostConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.boost.org"
     license = "BSL-1.0"
-    topics = ("libraries", "cpp")
+    topics = ("c++", "library", "peer-reviewed", "portable", "header-only", "b2")
     package_type = "library"
     languages = ("C++",)
     settings = "os", "arch", "compiler", "build_type"
@@ -210,16 +212,10 @@ class BoostConan(ConanFile):
         **{f"without_{o}": o in _DEFAULT_WITHOUT for o in _CONFIGURE_OPTIONS},
     }
     implements = ["auto_shared_fpic", "auto_header_only"]
-    no_copy_source = True
-
-    def export(self):
-        copy(self, f"dependencies-{self.version}.yml", src=os.path.join(self.recipe_folder, "dependencies"), dst=self.export_folder)
 
     @property
     def _dependencies(self):
-        deps_file = os.path.join(self.source_folder, f"dependencies-{self.version}.yml")
-        with open(deps_file, encoding="utf-8") as f:
-            return yaml.safe_load(f)
+        return self.conan_data["dependencies"][self.version]
 
     def layout(self):
         basic_layout(self, src_folder="src")
