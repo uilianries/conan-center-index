@@ -1,12 +1,11 @@
 import os
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps"
 
     def layout(self):
         cmake_layout(self)
@@ -16,8 +15,9 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["HEADER_ONLY"] = self.dependencies["boost"].options.header_only
         tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -25,10 +25,5 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not can_run(self):
-            return
-        for file in os.listdir(self.cpp.build.bindirs[0]):
-            if file.startswith("test_boost_"):
-                if self.settings.os == "Windows" and not file.endswith(".exe"):
-                    continue
-                self.run(os.path.join(self.cpp.build.bindirs[0], file), env="conanrun")
+        if can_run(self):
+            self.run(os.path.join(self.cpp.build.bindir, "test_package"), env="conanrun")

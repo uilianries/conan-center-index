@@ -1,14 +1,17 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-if(HEADER_ONLY)
-    find_package(Boost REQUIRED)
-    add_executable(test_boost_lambda lambda.cpp)
-    target_link_libraries(test_boost_lambda PRIVATE Boost::headers)
-else()
-    find_package(Boost REQUIRED COMPONENTS regex filesystem)
-    add_executable(test_boost_lambda lambda.cpp)
-    target_link_libraries(test_boost_lambda PRIVATE Boost::headers)
-    add_executable(test_boost_linked linked.cpp)
-    target_link_libraries(test_boost_linked PRIVATE Boost::regex Boost::filesystem)
+find_package(Boost CONFIG REQUIRED)
+
+add_executable(${CMAKE_PROJECT_NAME} test_package.cpp)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Boost::headers)
+
+if (TARGET Boost::regex)
+    target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Boost::regex)
+    target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE TEST_BOOST_REGEX)
+endif()
+
+if (TARGET Boost::filesystem)
+    target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Boost::filesystem)
+    target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE TEST_BOOST_FILESYSTEM)
 endif()
