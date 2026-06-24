@@ -9,6 +9,7 @@ from conan.tools.env import VirtualBuildEnv
 
 import os
 import shlex
+import yaml
 
 required_conan_version = ">=2.4"
 
@@ -60,6 +61,8 @@ class B2Toolchain:
 
         for dep_name, b2_name in [("zlib", "zlib"), ("bzip2", "bzip2"),
                                    ("xz_utils", "lzma"), ("zstd", "zstd")]:
+            if dep_name not in conanfile.dependencies:
+                continue
             dep = conanfile.dependencies[dep_name]
             info = dep.cpp_info.aggregated_components()
             inc = info.includedirs[0].replace("\\", "/")
@@ -94,6 +97,17 @@ class BoostConan(ConanFile):
         "extra_b2_flags": None,
     }
     implements = ["auto_shared_fpic", "auto_header_only"]
+
+    def export(self):
+        copy(self, f"dependencies/dependencies-{self.version}.yml",
+             src=self.recipe_folder, dst=self.export_folder)
+
+    @property
+    def _dependencies(self):
+        deps_file = os.path.join(self.recipe_folder, "dependencies",
+                                 f"dependencies-{self.version}.yml")
+        with open(deps_file, encoding="utf-8") as f:
+            return yaml.safe_load(f)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -178,6 +192,7 @@ class BoostConan(ConanFile):
             flags.append(f"--without-{module}")
 
         flags += ["-sNO_ZLIB=0", "-sNO_BZIP2=0", "-sNO_LZMA=0", "-sNO_ZSTD=0"]
+        flags += ["boost.locale.icu=on", f"-sICU_PATH={self.dependencies['icu'].package_folder}"]
 
         if self.options.extra_b2_flags:
             flags.extend(shlex.split(str(self.options.extra_b2_flags)))
@@ -209,18 +224,53 @@ class BoostConan(ConanFile):
                  dst=os.path.join(self.package_folder, "include", "boost"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "Boost")
-        self.cpp_info.set_property("cmake_target_name", "Boost::boost")
         self.cpp_info.set_property("pkg_config_name", "boost")
+
         if self.options.header_only:
             self.cpp_info.bindirs = []
             self.cpp_info.libdirs = []
-        else:
-            self.cpp_info.libs = collect_libs(self)
-            if self.settings.os in ("Linux", "FreeBSD"):
-                self.cpp_info.system_libs = ["pthread", "rt"]
-            elif self.settings.os == "Windows":
-                self.cpp_info.system_libs = ["bcrypt"]
-                if self.options.shared:
-                    self.cpp_info.bindirs.append("lib")
+            return
+
+        deps = self._dependencies
+        installed = set(collect_libs(self))
+
+        for module, libs in deps["libs"].items():
+            if module in _EXCLUDED_MODULES:
+                continue
+            comp = self.cpp_info.components[module]
+            comp.libs = [lib for lib in libs if lib in installed]
+            comp.set_property("cmake_target_name", f"Boost::{module}")
+            inter = [d for d in deps["dependencies"].get(module, []) if d not in _EXCLUDED_MODULES]
+            comp.requires = inter
+            # Disable Boost's MSVC auto-link pragma for compiled modules
+            if comp.libs:
+                comp.defines = [f"BOOST_{module.upper()}_NO_LIB"]
+
+        # Header-only umbrella; Boost::boost is the traditional alias (mirrors BoostConfig.cmake)
+        self.cpp_info.components["headers"].libs = []
+        self.cpp_info.components["headers"].set_property("cmake_target_name", "Boost::headers")
+        self.cpp_info.components["headers"].set_property("cmake_aliases", ["Boost::boost"])
+
+        # Utility interface targets from BoostConfig.cmake (Windows-only defines)
+        for util, define in [("diagnostic_definitions", "BOOST_LIB_DIAGNOSTIC"),
+                              ("disable_autolinking",    "BOOST_ALL_NO_LIB"),
+                              ("dynamic_linking",        "BOOST_ALL_DYN_LINK")]:
+            comp = self.cpp_info.components[util]
+            comp.libs = []
+            comp.set_property("cmake_target_name", f"Boost::{util}")
+            if self.settings.os == "Windows":
+                comp.defines = [define]
+                
+        if "iostreams" in self.cpp_info.components:
+            self.cpp_info.components["iostreams"].requires.extend(["zlib::zlib", "bzip2::bzip2", "lzma::lzma", "zstd::zstd"])
+        if "locale" in self.cpp_info.components:
+            self.cpp_info.components["locale"].requires.append("icu::icu")
+
+        # System libraries attached to the components that need them
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["thread"].system_libs = ["pthread", "rt"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["headers"].system_libs = ["bcrypt"]
+            if self.options.shared:
+                self.cpp_info.bindirs.append("lib")

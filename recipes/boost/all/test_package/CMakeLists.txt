@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-find_package(Boost REQUIRED)
-
-# Header-only test (always runs)
-add_executable(test_boost_lambda lambda.cpp)
-target_link_libraries(test_boost_lambda PRIVATE Boost::boost)
-
-if(NOT HEADER_ONLY)
+if(HEADER_ONLY)
+    find_package(Boost REQUIRED)
+    add_executable(test_boost_lambda lambda.cpp)
+    target_link_libraries(test_boost_lambda PRIVATE Boost::headers)
+else()
+    find_package(Boost REQUIRED COMPONENTS regex filesystem)
+    add_executable(test_boost_lambda lambda.cpp)
+    target_link_libraries(test_boost_lambda PRIVATE Boost::headers)
     add_executable(test_boost_linked linked.cpp)
-    target_link_libraries(test_boost_linked PRIVATE Boost::boost)
+    target_link_libraries(test_boost_linked PRIVATE Boost::regex Boost::filesystem)
 endif()
