@@ -23,7 +23,8 @@ _CONFIGURE_OPTIONS = (
 )
 
 # Disabled by default: require heavy external deps or are niche/C++20-only.
-_DEFAULT_WITHOUT = {"python", "mpi", "graph_parallel", "cobalt", "stacktrace"}
+# _DEFAULT_WITHOUT = {"python", "mpi", "graph_parallel", "cobalt", "stacktrace"}
+_DEFAULT_WITHOUT = {}
 
 
 class B2Toolchain:
