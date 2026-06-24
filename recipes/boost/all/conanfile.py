@@ -9,11 +9,10 @@ from conan.tools.env import VirtualBuildEnv
 
 import os
 import shlex
-import yaml
 
 required_conan_version = ">=2.4"
 
-# TODO: It can be extracted dynamically from dependencies.yml, but could result in different recipe revision.
+# INFO: Extracted from dependecies list in conandata.yml
 _CONFIGURE_OPTIONS = (
     "atomic", "charconv", "chrono", "cobalt", "container", "context",
     "contract", "coroutine", "date_time", "exception", "fiber", "filesystem",
@@ -215,7 +214,7 @@ class BoostConan(ConanFile):
 
     @property
     def _dependencies(self):
-        return self.conan_data["dependencies"][self.version]
+        return self.conan_data["dependencies"][self.version]["dependencies"]
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -270,28 +269,27 @@ class BoostConan(ConanFile):
         if self.options.header_only:
             self.cpp_info.bindirs = []
             self.cpp_info.libdirs = []
-            return
+        else:
+            deps = self._dependencies
+            installed = set(collect_libs(self))
 
-        deps = self._dependencies
-        installed = set(collect_libs(self))
-
-        # INFO: Mimic BoostConfig.cmake
-        for module, libs in deps["libs"].items():
-            if self.options.get_safe(f"without_{module}"):
-                continue
-            comp = self.cpp_info.components[module]
-            comp.libs = [lib for lib in libs if lib in installed]
-            comp.set_property("cmake_target_name", f"Boost::{module}")
-            inter = [d for d in deps["dependencies"].get(module, [])
-                     if not self.options.get_safe(f"without_{d}", False)]
-            comp.requires = inter
-            if module == "iostreams":
-                comp.requires.extend(["zlib::zlib", "bzip2::bzip2", "xz_utils::xz_utils", "zstd::zstd"])
-            elif module == "locale":
-                comp.requires.append("icu::icu")
-            # Disable Boost's MSVC auto-link pragma for compiled modules
-            if comp.libs:
-                comp.defines = [f"BOOST_{module.upper()}_NO_LIB"]
+            # INFO: Mimic BoostConfig.cmake
+            for module, libs in deps["libs"].items():
+                if self.options.get_safe(f"without_{module}"):
+                    continue
+                comp = self.cpp_info.components[module]
+                comp.libs = [lib for lib in libs if lib in installed]
+                comp.set_property("cmake_target_name", f"Boost::{module}")
+                inter = [d for d in deps["dependencies"].get(module, [])
+                        if not self.options.get_safe(f"without_{d}", False)]
+                comp.requires = inter
+                if module == "iostreams":
+                    comp.requires.extend(["zlib::zlib", "bzip2::bzip2", "xz_utils::xz_utils", "zstd::zstd"])
+                elif module == "locale":
+                    comp.requires.append("icu::icu")
+                # Disable Boost's MSVC auto-link pragma for compiled modules
+                if comp.libs:
+                    comp.defines = [f"BOOST_{module.upper()}_NO_LIB"]
 
         # Header-only umbrella; Boost::boost is the traditional alias (mirrors BoostConfig.cmake)
         self.cpp_info.components["headers"].libs = []
