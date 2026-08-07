@@ -47,3 +47,10 @@ sources:
   "5.5.3":
     url: "https://github.com/bfgroup/b2/releases/download/5.5.3/b2-5.5.3.tar.bz2"
     sha256: "d3b914917f8ccf615ee7ec78e59b96c7b49c39f551d5b73525871b2f44cf70d5"
+  "5.6.0-dev":
+    url: "https://github.com/bfgroup/b2/archive/37c5c733c9b3883973e9d4c0a87a7b4833f5501a.zip"
+    sha256: "5068ad45f29a2aa9b82f457b637acc054d477e75bddca28921425f83286bcee1"
+
+patches:
+  "5.6.0-dev":
+    - patch_file: "patches/0001-fix-target-os.patch"

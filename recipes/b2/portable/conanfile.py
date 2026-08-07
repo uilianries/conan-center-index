@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, copy, get
+from conan.tools.files import chdir, copy, get, apply_conandata_patches, export_conandata_patches, chmod
 from conan.tools.layout import basic_layout
 
 from contextlib import contextmanager
@@ -77,8 +77,13 @@ class B2Conan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Option toolset 'cxx' and 'cross-cxx' requires 'use_cxx_env=True'")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        chmod(self, os.path.join(self.source_folder, "src", "engine", "build.sh"), execute=True)
 
     @property
     def _b2_dir(self):
