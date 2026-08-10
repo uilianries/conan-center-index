@@ -31,3 +31,5 @@ versions:
     folder: portable
   "5.5.3":
     folder: portable
+  "5.6.0-dev":
+    folder: portable
