@@ -1,0 +1,99 @@
+diff --git a/src/tools/clang-darwin.jam b/src/tools/clang-darwin.jam
+index 07ef39476..2745ff7fc 100644
+--- a/src/tools/clang-darwin.jam
++++ b/src/tools/clang-darwin.jam
+@@ -50,6 +50,12 @@ rule init ( version ? :  command * : options * )
+         : version $(version) ] ;
+ 
+     common.handle-options clang-darwin : $(condition) : $(command) : $(options) ;
++
++    if $(command)
++    {
++        clang.set-target-os-default clang-darwin : $(condition) : $(command-string) : $(options) ;
++    }
++
+     clang.init-flags clang-darwin : $(condition) : $(version) :
+         [ feature.get-values <triplet> : $(options) ] ;
+ 
+diff --git a/src/tools/clang-linux.jam b/src/tools/clang-linux.jam
+index 03f5546c2..38918f84d 100644
+--- a/src/tools/clang-linux.jam
++++ b/src/tools/clang-linux.jam
+@@ -74,6 +74,12 @@ rule init ( version ? :  command * : options * ) {
+     : version $(version) ] ;
+ 
+   common.handle-options clang-linux : $(condition) : $(command) : $(options) ;
++
++  if $(command)
++  {
++      clang.set-target-os-default clang-linux : $(condition) : $(command-string) : $(options) ;
++  }
++
+   clang.init-flags clang-linux : $(condition) : $(version) :
+       [ feature.get-values <triple> : $(options) ] ;
+ 
+diff --git a/src/tools/clang.jam b/src/tools/clang.jam
+index b58aedb6b..85acbb0e6 100644
+--- a/src/tools/clang.jam
++++ b/src/tools/clang.jam
+@@ -35,6 +35,34 @@ rule init ( * : * )
+ }
+ 
+ 
++rule set-target-os-default ( toolset : condition * : command-string : options * )
++{
++    # Autodetect target-os from the compiler's own triple, unless the
++    # toolset was already told what to target
++    if ! [ feature.get-values <target-os> : $(options) ]
++    {
++        local machine = [ MATCH "^([^ ]+)" :
++            [ SHELL "$(command-string) -dumpmachine" ] ] ;
++        local target-os ;
++        switch $(machine:L)
++        {
++            case *android* : target-os ?= android ;
++            case *mingw*   : target-os ?= windows ;
++            case *cygwin*  : target-os ?= cygwin ;
++            case *linux*   : target-os ?= linux ;
++            case *darwin*  : target-os ?= darwin ;
++            case *freebsd* : target-os ?= freebsd ;
++            case *solaris* : target-os ?= solaris ;
++            case *qnx*     : target-os ?= qnxnto ;
++        }
++        if $(target-os)
++        {
++            local conditionx = [ regex.replace $(condition) "/" "," ] ;
++            toolset.add-defaults $(conditionx)\:<target-os>$(target-os) ;
++        }
++    }
++}
++
+ local rule cxxstd-flags ( toolset : condition * : options * )
+ {
+     toolset.flags $(toolset).compile.c++ OPTIONS $(condition) : $(options) : unchecked ;
+diff --git a/src/tools/gcc.jam b/src/tools/gcc.jam
+index af25131bd..4aebeff3f 100644
+--- a/src/tools/gcc.jam
++++ b/src/tools/gcc.jam
+@@ -199,11 +199,16 @@ rule init ( version ? : command * : options * : requirement * )
+         }
+         switch $(machine:L)
+         {
+-            case *mingw*  : target-os ?= windows ;
+-            case *cygwin* : target-os ?= cygwin ;
+-            case *linux*  : target-os ?= linux ;
+-            case *aix*    : target-os ?= aix ;
+-            case *hpux*   : target-os ?= hpux ;
++            case *mingw*   : target-os ?= windows ;
++            case *cygwin*  : target-os ?= cygwin ;
++            case *android* : target-os ?= android ;
++            case *linux*   : target-os ?= linux ;
++            case *aix*     : target-os ?= aix ;
++            case *hpux*    : target-os ?= hpux ;
++            case *darwin*  : target-os ?= darwin ;
++            case *freebsd* : target-os ?= freebsd ;
++            case *solaris* : target-os ?= solaris ;
++            case *qnx*     : target-os ?= qnxnto ;
+             # TODO: finish this list.
+         }
+     }
