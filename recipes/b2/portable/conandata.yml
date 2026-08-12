@@ -54,3 +54,4 @@ sources:
 patches:
   "5.6.0-dev":
     - patch_file: "patches/0001-fix-target-os.patch"
+    - patch_file: "patches/0002-fix-architecture.patch"

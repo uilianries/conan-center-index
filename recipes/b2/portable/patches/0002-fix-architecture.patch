@@ -1,0 +1,164 @@
+diff --git a/src/tools/clang-darwin.jam b/src/tools/clang-darwin.jam
+index 2745ff7fc..f6267ec67 100644
+--- a/src/tools/clang-darwin.jam
++++ b/src/tools/clang-darwin.jam
+@@ -53,7 +53,7 @@ rule init ( version ? :  command * : options * )
+
+     if $(command)
+     {
+-        clang.set-target-os-default clang-darwin : $(condition) : $(command-string) : $(options) ;
++        clang.set-defaults clang-darwin : $(condition) : $(command-string) : $(options) ;
+     }
+
+     clang.init-flags clang-darwin : $(condition) : $(version) :
+diff --git a/src/tools/clang-linux.jam b/src/tools/clang-linux.jam
+index 38918f84d..1b1852373 100644
+--- a/src/tools/clang-linux.jam
++++ b/src/tools/clang-linux.jam
+@@ -77,7 +77,7 @@ rule init ( version ? :  command * : options * ) {
+
+   if $(command)
+   {
+-      clang.set-target-os-default clang-linux : $(condition) : $(command-string) : $(options) ;
++      clang.set-defaults clang-linux : $(condition) : $(command-string) : $(options) ;
+   }
+
+   clang.init-flags clang-linux : $(condition) : $(version) :
+diff --git a/src/tools/clang.jam b/src/tools/clang.jam
+index 85acbb0e6..123cafb8e 100644
+--- a/src/tools/clang.jam
++++ b/src/tools/clang.jam
+@@ -35,31 +35,64 @@ rule init ( * : * )
+ }
+
+
+-rule set-target-os-default ( toolset : condition * : command-string : options * )
++rule set-defaults ( toolset : condition * : command-string : options * )
+ {
+-    # Autodetect target-os from the compiler's own triple, unless the
+-    # toolset was already told what to target
++    # Autodetect target-os and architecture from the compiler's own triple,
++    # unless the toolset was already told what to target.
+     if ! [ feature.get-values <target-os> : $(options) ]
++        || ! [ feature.get-values <architecture> : $(options) ]
+     {
+         local machine = [ MATCH "^([^ ]+)" :
+             [ SHELL "$(command-string) -dumpmachine" ] ] ;
+         local target-os ;
++        local architecture ;
+         switch $(machine:L)
+         {
+             case *android* : target-os ?= android ;
+             case *mingw*   : target-os ?= windows ;
+             case *cygwin*  : target-os ?= cygwin ;
+             case *linux*   : target-os ?= linux ;
++            case *tvos*    : target-os ?= appletv ;
++            case *watchos* : target-os ?= iphone ;
++            case *ios*     : target-os ?= iphone ;
+             case *darwin*  : target-os ?= darwin ;
+             case *freebsd* : target-os ?= freebsd ;
+             case *solaris* : target-os ?= solaris ;
+             case *qnx*     : target-os ?= qnxnto ;
+         }
+-        if $(target-os)
++        switch $(machine:L)
++        {
++            case *aarch64*   : architecture ?= arm ;
++            case *arm*       : architecture ?= arm ;
++            case *x86_64*    : architecture ?= x86 ;
++            case *amd64*     : architecture ?= x86 ;
++            case *86*        : architecture ?= x86 ;
++            case *powerpc*   : architecture ?= power ;
++            case *ppc*       : architecture ?= power ;
++            case *sparc*     : architecture ?= sparc ;
++            case *s390*      : architecture ?= s390x ;
++            case *riscv*     : architecture ?= riscv ;
++            case *loongarch* : architecture ?= loongarch ;
++            case *mips64*    : architecture ?= mips64 ;
++            case *mips*      : architecture ?= mips ;
++            case *hppa*      : architecture ?= parisc ;
++            case *parisc*    : architecture ?= parisc ;
++            case *ia64*      : architecture ?= ia64 ;
++        }
++
++        local conditionx ;
++        if $(target-os) || $(architecture)
++        {
++            conditionx = [ regex.replace $(condition) "/" "," ] ;
++        }
++        if $(target-os) && ! [ feature.get-values <target-os> : $(options) ]
+         {
+-            local conditionx = [ regex.replace $(condition) "/" "," ] ;
+             toolset.add-defaults $(conditionx)\:<target-os>$(target-os) ;
+         }
++        if $(architecture) && ! [ feature.get-values <architecture> : $(options) ]
++        {
++            toolset.add-defaults $(conditionx)\:<architecture>$(architecture) ;
++        }
+     }
+ }
+
+diff --git a/src/tools/gcc.jam b/src/tools/gcc.jam
+index 4aebeff3f..abac8bcfe 100644
+--- a/src/tools/gcc.jam
++++ b/src/tools/gcc.jam
+@@ -184,6 +184,7 @@ rule init ( version ? : command * : options * : requirement * )
+     }
+     local machine ;
+     local target-os ;
++    local architecture ;
+     #   Autodetect the version and flavor if not given.
+     if $(command)
+     {
+@@ -211,6 +212,26 @@ rule init ( version ? : command * : options * : requirement * )
+             case *qnx*     : target-os ?= qnxnto ;
+             # TODO: finish this list.
+         }
++        switch $(machine:L)
++        {
++            case *aarch64*   : architecture ?= arm ;
++            case *arm*       : architecture ?= arm ;
++            case *x86_64*    : architecture ?= x86 ;
++            case *amd64*     : architecture ?= x86 ;
++            case *86*        : architecture ?= x86 ;
++            case *powerpc*   : architecture ?= power ;
++            case *ppc*       : architecture ?= power ;
++            case *sparc*     : architecture ?= sparc ;
++            case *s390*      : architecture ?= s390x ;
++            case *riscv*     : architecture ?= riscv ;
++            case *loongarch* : architecture ?= loongarch ;
++            case *mips64*    : architecture ?= mips64 ;
++            case *mips*      : architecture ?= mips ;
++            case *hppa*      : architecture ?= parisc ;
++            case *parisc*    : architecture ?= parisc ;
++            case *ia64*      : architecture ?= ia64 ;
++            # TODO: finish this list.
++        }
+     }
+
+     local condition ;
+@@ -219,12 +240,22 @@ rule init ( version ? : command * : options * : requirement * )
+
+     common.handle-options gcc : $(condition) : $(command) : $(options) ;
+
+-    # Set the default target-os for this toolset.
++    # Set the default target-os and architecture for this toolset, unless
++    # already fixed by the caller's requirements.
++    local conditionx ;
++    if ( $(target-os) && ! [ feature.get-values <target-os> : $(requirement) ] )
++        || ( $(architecture) && ! [ feature.get-values <architecture> : $(requirement) ] )
++    {
++        conditionx = [ regex.replace $(condition) "/" "," ] ;
++    }
+     if $(target-os) && ! [ feature.get-values <target-os> : $(requirement) ]
+     {
+-        local conditionx = [ regex.replace $(condition) "/" "," ] ;
+         toolset.add-defaults $(conditionx)\:<target-os>$(target-os) ;
+     }
++    if $(architecture) && ! [ feature.get-values <architecture> : $(requirement) ]
++    {
++        toolset.add-defaults $(conditionx)\:<architecture>$(architecture) ;
++    }
+
+     # If gcc is installed in a non-standard location, we would need to add
+     # LD_LIBRARY_PATH when running programs created with it (for unit-test/run
