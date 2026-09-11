@@ -85,8 +85,7 @@ class XkbcommonConan(ConanFile):
         if self.settings.os == "Android":
             tc.project_options["enable-tools"] = False
         elif self.settings.os == "Linux":
-            tc.project_options["x-locale-root"] = "/usr/share/X11/locale"
-            tc.project_options["xkb-config-root"] = "/usr/share/X11/xkb"
+            tc.project_options["x-locale-root"] = "/usr/share/X11/locale"            
         tc.generate()
 
         pkg_config_deps = PkgConfigDeps(self)
